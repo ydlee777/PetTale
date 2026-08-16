@@ -11,6 +11,15 @@ spring:
     open-in-view: false
   flyway:
     enabled: true
+pettale:
+  apple:
+    issuer: ${PETTALE_APPLE_ISSUER:https://appleid.apple.com}
+    audience: ${PETTALE_APPLE_AUDIENCE:com.pettale.app}
+    jwk-set-uri: ${PETTALE_APPLE_JWK_SET_URI:https://appleid.apple.com/auth/keys}
+  session:
+    issuer: ${PETTALE_SESSION_ISSUER:pettale-backend}
+    lifetime: ${PETTALE_SESSION_LIFETIME:PT15M}
+    signing-key: ${PETTALE_SESSION_SIGNING_KEY:}
 management:
   endpoints:
     web:
@@ -19,4 +28,3 @@ management:
   endpoint:
     health:
       show-details: never
-

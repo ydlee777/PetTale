@@ -37,6 +37,8 @@ export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
 export PETTALE_DB_URL=jdbc:postgresql://localhost:5432/pettale
 export PETTALE_DB_USERNAME=pettale
 export PETTALE_DB_PASSWORD='your-local-password'
+export PETTALE_APPLE_AUDIENCE='com.pettale.app'
+export PETTALE_SESSION_SIGNING_KEY='base64-of-at-least-32-random-bytes'
 mvn -f backend/pom.xml spring-boot:run
 curl http://localhost:8080/actuator/health
 ```
@@ -48,3 +50,4 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home mvn -f 
 JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home mvn -f backend/pom.xml verify
 ```
 
+Sign in with Apple is optional for local pet history and is used only to create a backend service session. See [`doc/AUTHENTICATION.md`](doc/AUTHENTICATION.md) for the verification flow, session lifecycle, environment variables, and Apple Developer setup.

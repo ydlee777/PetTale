@@ -9,7 +9,7 @@ enum PettalePersistence {
         cloudKitEnabled: Bool = true,
         storeURL: URL? = nil
     ) throws -> ModelContainer {
-        let schema = Schema(versionedSchema: PettaleSchemaV2.self)
+        let schema = Schema(versionedSchema: PettaleSchemaV3.self)
         let cloudKitDatabase: ModelConfiguration.CloudKitDatabase = cloudKitEnabled
             ? .private(cloudKitContainerIdentifier)
             : .none

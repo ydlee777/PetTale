@@ -4,6 +4,9 @@
     "Activity" : {
       "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "활동" } } }
     },
+    "Account" : {
+      "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "계정" } } }
+    },
     "Add Pet" : {
       "localizations" : {
         "ko" : {
@@ -43,6 +46,24 @@
           }
         }
       }
+    },
+    "Pettale Account" : {
+      "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "Pettale 계정" } } }
+    },
+    "Sign in failed. Please try again." : {
+      "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "로그인에 실패했습니다. 다시 시도해 주세요." } } }
+    },
+    "Sign in is only required for future online services. Your local pet history remains available." : {
+      "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "로그인은 향후 온라인 서비스에만 필요합니다. 기기에 저장된 반려동물 기록은 계속 이용할 수 있습니다." } } }
+    },
+    "Sign Out" : {
+      "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "로그아웃" } } }
+    },
+    "Signed In" : {
+      "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "로그인됨" } } }
+    },
+    "Signing In" : {
+      "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "로그인 중" } } }
     },
     "Adoption Date" : {
       "localizations" : {
