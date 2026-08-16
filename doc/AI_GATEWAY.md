@@ -22,6 +22,8 @@ Before counting, reservations older than `PETTALE_AI_RESERVATION_TIMEOUT` (defau
 
 - `PETTALE_AI_MONTHLY_REQUEST_LIMIT`: temporary monthly allowance; default `25`.
 - `PETTALE_EXTRACTION_MODEL`: server-side model selection; default `gpt-5-mini`.
+- `PETTALE_EXTRACTION_REASONING_EFFORT`: Responses API reasoning effort; default `low`.
+- `PETTALE_EXTRACTION_TEXT_VERBOSITY`: Responses API text verbosity; default `low`.
 - `PETTALE_OPENAI_API_KEY`: required at runtime for extraction; secret and server-only.
 - `PETTALE_OPENAI_BASE_URL`: official API base by default; override only for controlled testing.
 - `PETTALE_OPENAI_TIMEOUT`: bounded provider request/connect timeout; default `PT30S`.
@@ -33,3 +35,7 @@ The provider uses the OpenAI Responses API with `store: false` and strict JSON S
 For the current V1 extraction contract, every `WEIGHT` category draft represents a pet body-weight observation and therefore must use canonical `eventType = BODY_WEIGHT`. The provider instruction and schema description express this semantic rule, and backend validation independently rejects `WEIGHT` drafts with any other event type. No broader event-type taxonomy is defined yet.
 
 An explicit pet vomiting observation uses `category = HEALTH` and canonical `eventType = VOMITING`. The provider contract prohibits the observed aliases `VOMITED` and `VOMIT`, and backend validation independently rejects those aliases. This is a focused invariant rather than a general HEALTH taxonomy.
+
+## V1 extraction optimization decision
+
+The approved V1 defaults are the product model alias `gpt-5-mini`, reasoning effort `low`, and text verbosity `low`. The dated provider snapshot is observed metadata, not a configured model pin. The fixed eight-case regression benchmark passed 8/8 with these settings, with 3.681 seconds median latency, 3.834 seconds average latency, and an estimated average cost of approximately $0.000944 per extraction at the benchmark pricing recorded on 2026-08-17. Preserve the fixed benchmark in `doc/OPENAI_BENCHMARK.md` for future regression comparisons.

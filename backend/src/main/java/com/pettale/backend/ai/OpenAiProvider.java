@@ -38,17 +38,23 @@ final class OpenAiProvider implements AiProvider {
     private final HttpClient http;
     private final String apiKey;
     private final String model;
+    private final String reasoningEffort;
+    private final String textVerbosity;
     private final URI endpoint;
     private final Duration timeout;
 
     OpenAiProvider(ObjectMapper json,
             @Value("${pettale.ai.openai-api-key}") String apiKey,
             @Value("${pettale.ai.extraction-model}") String model,
+            @Value("${pettale.ai.reasoning-effort:}") String reasoningEffort,
+            @Value("${pettale.ai.text-verbosity:}") String textVerbosity,
             @Value("${pettale.ai.openai-base-url}") String baseUrl,
             @Value("${pettale.ai.provider-timeout}") Duration timeout) {
         this.json = json;
         this.apiKey = apiKey;
         this.model = model;
+        this.reasoningEffort = reasoningEffort;
+        this.textVerbosity = textVerbosity;
         this.endpoint = URI.create(baseUrl).resolve("/v1/responses");
         this.timeout = timeout;
         this.http = HttpClient.newBuilder().connectTimeout(timeout).build();
@@ -90,7 +96,14 @@ final class OpenAiProvider implements AiProvider {
         body.put("instructions", INSTRUCTIONS);
         body.put("input", inputText(input));
         body.put("max_output_tokens", 2_000);
-        var format = body.putObject("text").putObject("format");
+        if (reasoningEffort != null && !reasoningEffort.isBlank()) {
+            body.putObject("reasoning").put("effort", reasoningEffort.trim());
+        }
+        var text = body.putObject("text");
+        if (textVerbosity != null && !textVerbosity.isBlank()) {
+            text.put("verbosity", textVerbosity.trim());
+        }
+        var format = text.putObject("format");
         format.put("type", "json_schema");
         format.put("name", "pettale_event_extraction_v1");
         format.put("strict", true);
@@ -184,6 +197,8 @@ final class OpenAiProvider implements AiProvider {
                 ? usage.path("input_tokens").asLong() : null;
         var outputTokens = usage.path("output_tokens").canConvertToLong()
                 ? usage.path("output_tokens").asLong() : null;
+        var reasoningTokensNode = usage.path("output_tokens_details").path("reasoning_tokens");
+        var reasoningTokens = reasoningTokensNode.canConvertToLong() ? reasoningTokensNode.asLong() : null;
         var incompleteReason = root.path("incomplete_details").path("reason").asText(null);
 
         if (refusal) {
@@ -215,12 +230,15 @@ final class OpenAiProvider implements AiProvider {
                     "INVALID_STRUCTURED_OUTPUT");
             throw new ProviderFailure(ProviderFailure.Kind.INVALID_STRUCTURED_OUTPUT, error);
         }
-        return new ExtractionResult(
+        var result = new ExtractionResult(
                 "OPENAI",
                 requiredText(root, "model"), requiredLong(usage, "input_tokens"),
                 requiredLong(usage, "output_tokens"), requiredText(root, "id"),
                 structured.schemaVersion(),
                 canonicalEvents(structured.events()));
+        log.info("OpenAI extraction completed responseId={} model={} inputTokens={} outputTokens={} reasoningTokens={}",
+                result.providerRequestId(), result.model(), result.inputTokens(), result.outputTokens(), reasoningTokens);
+        return result;
     }
 
     private static List<ExtractedEventDraft> canonicalEvents(List<ExtractedEventDraft> events) {
