@@ -39,6 +39,9 @@ export PETTALE_DB_USERNAME=pettale
 export PETTALE_DB_PASSWORD='your-local-password'
 export PETTALE_APPLE_AUDIENCE='com.pettale.app'
 export PETTALE_SESSION_SIGNING_KEY='base64-of-at-least-32-random-bytes'
+export PETTALE_SESSION_LIFETIME='P30D'
+export PETTALE_AI_MONTHLY_REQUEST_LIMIT='25'
+export PETTALE_EXTRACTION_MODEL='gpt-5-mini'
 mvn -f backend/pom.xml spring-boot:run
 curl http://localhost:8080/actuator/health
 ```
@@ -51,3 +54,5 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home mvn -f 
 ```
 
 Sign in with Apple is optional for local pet history and is used only to create a backend service session. See [`doc/AUTHENTICATION.md`](doc/AUTHENTICATION.md) for the verification flow, session lifecycle, environment variables, and Apple Developer setup.
+
+The internal AI gateway reserves authenticated usage before any future provider call; Step 3C exposes no extraction endpoint. See [`doc/AI_GATEWAY.md`](doc/AI_GATEWAY.md) for quota, concurrency, and privacy semantics.

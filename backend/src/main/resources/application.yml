@@ -18,8 +18,11 @@ pettale:
     jwk-set-uri: ${PETTALE_APPLE_JWK_SET_URI:https://appleid.apple.com/auth/keys}
   session:
     issuer: ${PETTALE_SESSION_ISSUER:pettale-backend}
-    lifetime: ${PETTALE_SESSION_LIFETIME:PT15M}
+    lifetime: ${PETTALE_SESSION_LIFETIME:P30D}
     signing-key: ${PETTALE_SESSION_SIGNING_KEY:}
+  ai:
+    monthly-request-limit: ${PETTALE_AI_MONTHLY_REQUEST_LIMIT:25}
+    extraction-model: ${PETTALE_EXTRACTION_MODEL:gpt-5-mini}
 management:
   endpoints:
     web:
