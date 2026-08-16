@@ -33,7 +33,7 @@ struct BackendAuthenticationService: AuthenticationService {
     private struct RequestBody: Encodable { let identityToken: String; let nonce: String }
     private struct ResponseBody: Decodable { let userId: UUID; let accessToken: String; let expiresAt: Date }
 
-    private static var configuredBaseURL: URL {
+    static var configuredBaseURL: URL {
         guard
             let value = Bundle.main.object(forInfoDictionaryKey: "PETTALEAPIBaseURL") as? String,
             let url = URL(string: value)

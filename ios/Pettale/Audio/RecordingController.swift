@@ -15,6 +15,10 @@ enum RecordingPhase: Equatable {
     case preparingTranscription
     case transcribing
     case transcriptReview
+    case authenticationRequired
+    case extracting
+    case eventDraftReview
+    case extractionFailed
     case transcriptionFailed
     case permissionDenied
     case failed
@@ -53,6 +57,10 @@ final class RecordingController {
     private(set) var duration: TimeInterval = 0
     private(set) var isPlaying = false
     private(set) var userMessage: String?
+    private(set) var recordedAt = Date()
+    private(set) var recordingTimeZoneIdentifier = TimeZone.current.identifier
+    private(set) var extractedEvents: [ExtractedEventDraft] = []
+    private(set) var extractionError: EventExtractionError?
     var transcriptDraft = ""
     var transcriptionLanguage: TranscriptionLanguage = .english
 
@@ -60,6 +68,8 @@ final class RecordingController {
     private let temporaryDirectory: URL
     private let fileManager: FileManager
     private let transcriptionService: SpeechTranscriptionService
+    private let extractionService: EventExtractionService
+    private let currentTimeZoneIdentifier: () -> String
     private var durationTask: Task<Void, Never>?
     private var recordingStartedAt: Date?
     private var transcriptionSessionID = UUID()
@@ -69,6 +79,8 @@ final class RecordingController {
         petName: String,
         audioService: AudioRecordingService,
         transcriptionService: SpeechTranscriptionService,
+        extractionService: EventExtractionService = BackendEventExtractionService(),
+        currentTimeZoneIdentifier: @escaping () -> String = { TimeZone.current.identifier },
         temporaryDirectory: URL = FileManager.default.temporaryDirectory,
         fileManager: FileManager = .default
     ) {
@@ -76,6 +88,8 @@ final class RecordingController {
         self.petName = petName
         self.audioService = audioService
         self.transcriptionService = transcriptionService
+        self.extractionService = extractionService
+        self.currentTimeZoneIdentifier = currentTimeZoneIdentifier
         self.temporaryDirectory = temporaryDirectory
         self.fileManager = fileManager
         permissionState = audioService.permissionState
@@ -117,6 +131,8 @@ final class RecordingController {
             .appendingPathExtension("m4a")
         do {
             try audioService.startRecording(to: url)
+            recordedAt = Date()
+            recordingTimeZoneIdentifier = currentTimeZoneIdentifier()
             temporaryAudioURL = url
             duration = 0
             recordingStartedAt = Date()
@@ -205,8 +221,57 @@ final class RecordingController {
         await beginTranscription()
     }
 
+    func continueToExtraction(session: PettaleSession?, knownPetNames: [String]) async {
+        guard phase == .transcriptReview || phase == .authenticationRequired || phase == .extractionFailed else { return }
+        guard !transcriptDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            phase = .extractionFailed
+            extractionError = .invalidResponse
+            userMessage = String(localized: "Review the transcript before continuing.")
+            return
+        }
+        guard let session, !session.isExpired else {
+            phase = .authenticationRequired
+            return
+        }
+        phase = .extracting
+        extractionError = nil
+        userMessage = nil
+        do {
+            let result = try await extractionService.extract(
+                transcript: transcriptDraft,
+                recordedAt: recordedAt,
+                petID: petID,
+                petName: petName,
+                knownPetNames: knownPetNames,
+                spokenLanguage: transcriptionLanguage.locale.identifier,
+                timeZone: recordingTimeZoneIdentifier,
+                session: session
+            )
+            extractedEvents = result.events
+            phase = .eventDraftReview
+        } catch let error as EventExtractionError {
+            extractionError = error
+            phase = .extractionFailed
+            userMessage = error == .quotaExceeded
+                ? String(localized: "Your monthly AI allowance has been used.")
+                : String(localized: "Event extraction failed. Please try again.")
+        } catch {
+            extractionError = .temporarilyUnavailable
+            phase = .extractionFailed
+            userMessage = String(localized: "Event extraction failed. Please try again.")
+        }
+    }
+
+    func returnToTranscriptReview() {
+        guard phase == .eventDraftReview || phase == .extractionFailed || phase == .authenticationRequired else { return }
+        extractedEvents = []
+        extractionError = nil
+        userMessage = nil
+        phase = .transcriptReview
+    }
+
     func recordAgain() async {
-        guard phase == .review || phase == .transcriptReview || phase == .transcriptionFailed else { return }
+        guard phase == .review || phase == .transcriptReview || phase == .transcriptionFailed || phase == .eventDraftReview || phase == .extractionFailed || phase == .authenticationRequired else { return }
         cleanup()
         phase = .idle
         await beginRecording()
@@ -229,6 +294,8 @@ final class RecordingController {
     func cleanup() {
         transcriptionSessionID = UUID()
         transcriptDraft = ""
+        extractedEvents = []
+        extractionError = nil
         durationTask?.cancel()
         durationTask = nil
         audioService.stopPlayback()

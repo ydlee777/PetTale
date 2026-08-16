@@ -280,17 +280,139 @@ final class RecordingControllerTests: XCTestCase {
         controller.cleanup()
     }
 
+    func testValidSessionStartsExtractionAndMapsMultipleDrafts() async {
+        let extraction = FakeEventExtractionService()
+        extraction.result = .success(.init(
+            schemaVersion: "1",
+            clientPetId: extraction.petID,
+            events: [
+                .init(category: .weight, eventType: "BODY_WEIGHT", occurredAt: Date(), numericValue: 6.2, unit: "KG", count: nil, durationMinutes: nil, description: nil),
+                .init(category: .activity, eventType: "PLAY", occurredAt: Date(), numericValue: nil, unit: nil, count: nil, durationMinutes: 20, description: nil)
+            ]
+        ))
+        let controller = makeController(petID: extraction.petID, service: FakeAudioRecordingService(), extractionService: extraction)
+        await reachTranscriptReview(controller)
+        await controller.continueToExtraction(session: validSession(), knownPetNames: ["Oreo", "Creamy"])
+        XCTAssertEqual(controller.phase, .eventDraftReview)
+        XCTAssertEqual(controller.extractedEvents.count, 2)
+        XCTAssertEqual(extraction.callCount, 1)
+        XCTAssertEqual(extraction.receivedTranscript, "Oreo ate well.")
+        XCTAssertEqual(extraction.receivedPetNames, ["Oreo", "Creamy"])
+        XCTAssertEqual(extraction.receivedTimeZone, "Asia/Seoul")
+        controller.cleanup()
+    }
+
+    func testMissingOrExpiredSessionRequestsAuthenticationWithoutDiscardingTranscript() async {
+        let extraction = FakeEventExtractionService()
+        let controller = makeController(service: FakeAudioRecordingService(), extractionService: extraction)
+        await reachTranscriptReview(controller)
+        await controller.continueToExtraction(session: nil, knownPetNames: ["Oreo"])
+        XCTAssertEqual(controller.phase, .authenticationRequired)
+        XCTAssertEqual(controller.transcriptDraft, "Oreo ate well.")
+        await controller.continueToExtraction(
+            session: PettaleSession(userID: UUID(), accessToken: "expired", expiresAt: .distantPast),
+            knownPetNames: ["Oreo"]
+        )
+        XCTAssertEqual(controller.phase, .authenticationRequired)
+        XCTAssertEqual(extraction.callCount, 0)
+        controller.cleanup()
+    }
+
+    func testTranscriptSurvivesAuthenticationThenContinues() async {
+        let extraction = FakeEventExtractionService()
+        extraction.result = .success(.init(schemaVersion: "1", clientPetId: extraction.petID, events: [
+            .init(category: .food, eventType: "ATE_WELL", occurredAt: Date(), numericValue: nil, unit: nil, count: nil, durationMinutes: nil, description: nil)
+        ]))
+        let controller = makeController(petID: extraction.petID, service: FakeAudioRecordingService(), extractionService: extraction)
+        await reachTranscriptReview(controller)
+        await controller.continueToExtraction(session: nil, knownPetNames: ["Oreo"])
+        await controller.continueToExtraction(session: validSession(), knownPetNames: ["Oreo"])
+        XCTAssertEqual(controller.phase, .eventDraftReview)
+        XCTAssertEqual(extraction.receivedTranscript, "Oreo ate well.")
+        controller.cleanup()
+    }
+
+    func testExtractionFailureIsRetryableAndQuotaIsDistinct() async {
+        let extraction = FakeEventExtractionService()
+        extraction.result = .failure(EventExtractionError.temporarilyUnavailable)
+        let controller = makeController(service: FakeAudioRecordingService(), extractionService: extraction)
+        await reachTranscriptReview(controller)
+        await controller.continueToExtraction(session: validSession(), knownPetNames: ["Oreo"])
+        XCTAssertEqual(controller.phase, .extractionFailed)
+        XCTAssertEqual(controller.extractionError, .temporarilyUnavailable)
+        extraction.result = .failure(EventExtractionError.quotaExceeded)
+        await controller.continueToExtraction(session: validSession(), knownPetNames: ["Oreo"])
+        XCTAssertEqual(controller.extractionError, .quotaExceeded)
+        XCTAssertFalse(controller.transcriptDraft.isEmpty)
+        controller.cleanup()
+    }
+
+    func testDiscardClearsTransientExtractionWithoutPersistence() async {
+        let extraction = FakeEventExtractionService()
+        extraction.result = .success(.init(schemaVersion: "1", clientPetId: extraction.petID, events: [
+            .init(category: .health, eventType: "VOMITING", occurredAt: Date(), numericValue: nil, unit: nil, count: 1, durationMinutes: nil, description: nil)
+        ]))
+        let controller = makeController(petID: extraction.petID, service: FakeAudioRecordingService(), extractionService: extraction)
+        await reachTranscriptReview(controller)
+        await controller.continueToExtraction(session: validSession(), knownPetNames: ["Oreo"])
+        controller.discard()
+        XCTAssertEqual(controller.phase, .idle)
+        XCTAssertTrue(controller.extractedEvents.isEmpty)
+        XCTAssertTrue(controller.transcriptDraft.isEmpty)
+    }
+
+    private func reachTranscriptReview(_ controller: RecordingController) async {
+        await controller.beginRecording()
+        controller.finishRecording()
+        await controller.beginTranscription()
+        XCTAssertEqual(controller.phase, .transcriptReview)
+    }
+
+    private func validSession() -> PettaleSession {
+        PettaleSession(userID: UUID(), accessToken: "token", expiresAt: .distantFuture)
+    }
+
     private func makeController(
         petID: UUID = UUID(),
         service: FakeAudioRecordingService,
-        transcriptionService: FakeSpeechTranscriptionService = FakeSpeechTranscriptionService()
+        transcriptionService: FakeSpeechTranscriptionService = FakeSpeechTranscriptionService(),
+        extractionService: FakeEventExtractionService = FakeEventExtractionService()
     ) -> RecordingController {
         RecordingController(
             petID: petID,
             petName: "Oreo",
             audioService: service,
-            transcriptionService: transcriptionService
+            transcriptionService: transcriptionService,
+            extractionService: extractionService,
+            currentTimeZoneIdentifier: { "Asia/Seoul" }
         )
+    }
+}
+
+@MainActor
+private final class FakeEventExtractionService: EventExtractionService {
+    var petID = UUID()
+    var result: Result<EventExtractionResult, Error> = .failure(EventExtractionError.temporarilyUnavailable)
+    var callCount = 0
+    var receivedTranscript: String?
+    var receivedPetNames: [String] = []
+    var receivedTimeZone: String?
+
+    func extract(
+        transcript: String,
+        recordedAt: Date,
+        petID: UUID,
+        petName: String,
+        knownPetNames: [String],
+        spokenLanguage: String,
+        timeZone: String,
+        session: PettaleSession
+    ) async throws -> EventExtractionResult {
+        callCount += 1
+        receivedTranscript = transcript
+        receivedPetNames = knownPetNames
+        receivedTimeZone = timeZone
+        return try result.get()
     }
 }
 

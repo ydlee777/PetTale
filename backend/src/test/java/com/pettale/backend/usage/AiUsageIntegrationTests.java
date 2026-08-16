@@ -139,6 +139,18 @@ class AiUsageIntegrationTests {
                 .doesNotContain("transcript", "prompt", "response", "audio", "petId");
     }
 
+    @Test void staleReservationIsFailedBeforeQuotaIsRecounted() {
+        var user = user("apple-stale");
+        when(clock.instant()).thenReturn(AUGUST.minusSeconds(121));
+        var stale = service.reserve(user.getId(), AiOperation.EVENT_EXTRACTION);
+        when(clock.instant()).thenReturn(AUGUST);
+        var replacement = service.reserve(user.getId(), AiOperation.EVENT_EXTRACTION);
+        assertThat(usages.findById(stale.getId()).orElseThrow().getStatus()).isEqualTo(AiUsageStatus.FAILED);
+        assertThat(usages.findById(stale.getId()).orElseThrow().getFailureCategory())
+                .isEqualTo(AiFailureCategory.STALE_RESERVATION);
+        assertThat(replacement.getStatus()).isEqualTo(AiUsageStatus.RESERVED);
+    }
+
     private int attemptReserve(UUID userId, CountDownLatch ready, CountDownLatch start) throws InterruptedException {
         ready.countDown();
         start.await();

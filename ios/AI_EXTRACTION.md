@@ -1,0 +1,5 @@
+# Transient AI event extraction
+
+Transcript Review Continue requires a valid Pettale service session. Missing or expired sessions present Sign in with Apple without discarding the in-memory transcript; successful authentication resumes extraction. The client sends the approved transcript, recording time, selected pet opaque client ID/name, local pet names, spoken locale, and the native `TimeZone.current.identifier` captured when recording starts. The time zone belongs only to the recording session context and is not Pet profile data or SwiftData/CloudKit state. The client does not send audio, photos, diary/history, or other profile fields.
+
+The authenticated backend response uses schema version 1 and maps into mutable `ExtractedEventDraft` values separate from SwiftData `PetEvent`. The minimal review screen is read-only in Step 3D and clearly states that drafts have not been saved. Its final Continue action remains disabled. Back, retry, record again, discard, and flow dismissal clear transient extraction state as appropriate; no `PetRecord` or `PetEvent` is created.
