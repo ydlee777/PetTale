@@ -1,5 +1,38 @@
 import Foundation
 
+struct PetPhotoDraft: Equatable {
+    private let originalData: Data?
+    private(set) var change: Change = .unchanged
+
+    enum Change: Equatable {
+        case unchanged
+        case replacement(Data)
+        case removal
+    }
+
+    init(originalData: Data?) {
+        self.originalData = originalData
+    }
+
+    var previewData: Data? {
+        switch change {
+        case .unchanged: originalData
+        case .replacement(let data): data
+        case .removal: nil
+        }
+    }
+
+    var hasChanges: Bool { change != .unchanged }
+
+    mutating func select(_ data: Data) {
+        change = .replacement(data)
+    }
+
+    mutating func remove() {
+        change = .removal
+    }
+}
+
 struct PetFormState {
     var name = ""
     var species: PetSpecies = .cat
@@ -9,7 +42,9 @@ struct PetFormState {
     var hasAdoptionDate = false
     var adoptionDate = Date()
     var breed = ""
-    var profilePhotoData: Data?
+    private(set) var photoDraft = PetPhotoDraft(originalData: nil)
+
+    var profilePhotoData: Data? { photoDraft.previewData }
 
     init(pet: Pet? = nil) {
         guard let pet else { return }
@@ -21,7 +56,15 @@ struct PetFormState {
         hasAdoptionDate = pet.adoptionDate != nil
         adoptionDate = pet.adoptionDate ?? Date()
         breed = pet.breed ?? ""
-        profilePhotoData = pet.profilePhotoData
+        photoDraft = PetPhotoDraft(originalData: pet.profilePhotoData)
+    }
+
+    mutating func selectProfilePhoto(_ data: Data) {
+        photoDraft.select(data)
+    }
+
+    mutating func removeProfilePhoto() {
+        photoDraft.remove()
     }
 
     func makePet(now: Date = Date()) throws -> Pet {
@@ -47,7 +90,7 @@ struct PetFormState {
             breed: breed,
             at: date
         )
-        if pet.profilePhotoData != profilePhotoData {
+        if photoDraft.hasChanges {
             pet.setProfilePhotoData(profilePhotoData, at: date)
         }
     }

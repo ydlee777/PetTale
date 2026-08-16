@@ -3,6 +3,7 @@ import UIKit
 
 struct PetProfileView: View {
     let pet: Pet
+    let recordAction: () -> Void
     let editAction: () -> Void
 
     var body: some View {
@@ -16,6 +17,19 @@ struct PetProfileView: View {
                     Text(pet.species.localizedName)
                         .foregroundStyle(.secondary)
                 }
+
+                Button(action: recordAction) {
+                    VStack(spacing: 5) {
+                        Label("Record", systemImage: "mic.fill")
+                            .font(.title3.bold())
+                        Text("Tell today's tale")
+                            .font(.subheadline)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                }
+                .buttonStyle(.borderedProminent)
+                .accessibilityLabel("Record today's tale")
 
                 VStack(spacing: 0) {
                     if pet.sex != .unknown { profileRow("Sex", value: pet.sex.localizedName) }
