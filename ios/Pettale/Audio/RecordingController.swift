@@ -12,8 +12,21 @@ enum RecordingPhase: Equatable {
     case requestingPermission
     case recording
     case review
+    case preparingTranscription
+    case transcribing
+    case transcriptReview
+    case transcriptionFailed
     case permissionDenied
     case failed
+}
+
+enum TranscriptionLanguage: String, CaseIterable, Identifiable {
+    case english
+    case korean
+
+    var id: Self { self }
+    var locale: Locale { Locale(identifier: self == .english ? "en-US" : "ko-KR") }
+    var localizedName: String { String(localized: self == .english ? "English" : "Korean") }
 }
 
 @MainActor
@@ -40,23 +53,29 @@ final class RecordingController {
     private(set) var duration: TimeInterval = 0
     private(set) var isPlaying = false
     private(set) var userMessage: String?
+    var transcriptDraft = ""
+    var transcriptionLanguage: TranscriptionLanguage = .english
 
     private let audioService: AudioRecordingService
     private let temporaryDirectory: URL
     private let fileManager: FileManager
+    private let transcriptionService: SpeechTranscriptionService
     private var durationTask: Task<Void, Never>?
     private var recordingStartedAt: Date?
+    private var transcriptionSessionID = UUID()
 
     init(
         petID: UUID,
         petName: String,
         audioService: AudioRecordingService,
+        transcriptionService: SpeechTranscriptionService,
         temporaryDirectory: URL = FileManager.default.temporaryDirectory,
         fileManager: FileManager = .default
     ) {
         self.petID = petID
         self.petName = petName
         self.audioService = audioService
+        self.transcriptionService = transcriptionService
         self.temporaryDirectory = temporaryDirectory
         self.fileManager = fileManager
         permissionState = audioService.permissionState
@@ -66,7 +85,12 @@ final class RecordingController {
     }
 
     convenience init(petID: UUID, petName: String) {
-        self.init(petID: petID, petName: petName, audioService: AVAudioRecordingService())
+        self.init(
+            petID: petID,
+            petName: petName,
+            audioService: AVAudioRecordingService(),
+            transcriptionService: AppleSpeechTranscriptionService()
+        )
     }
 
     func beginRecording() async {
@@ -142,8 +166,47 @@ final class RecordingController {
         }
     }
 
+    func beginTranscription() async {
+        guard phase == .review || phase == .transcriptionFailed,
+              let temporaryAudioURL else { return }
+        stopPlaybackForTransition()
+        userMessage = nil
+        transcriptDraft = ""
+        let sessionID = UUID()
+        transcriptionSessionID = sessionID
+
+        phase = .preparingTranscription
+        do {
+            let transcript = try await transcriptionService.transcribe(
+                audioURL: temporaryAudioURL,
+                locale: transcriptionLanguage.locale
+            ) { [weak self] progress in
+                guard let self, self.transcriptionSessionID == sessionID else { return }
+                self.phase = progress == .preparing ? .preparingTranscription : .transcribing
+            }
+            guard transcriptionSessionID == sessionID, !Task.isCancelled else { return }
+            transcriptDraft = transcript
+            phase = .transcriptReview
+        } catch is CancellationError {
+            return
+        } catch let error as SpeechTranscriptionError {
+            guard transcriptionSessionID == sessionID else { return }
+            phase = .transcriptionFailed
+            userMessage = localizedMessage(for: error)
+        } catch {
+            guard transcriptionSessionID == sessionID else { return }
+            phase = .transcriptionFailed
+            userMessage = String(localized: "Transcription failed. Please try again.")
+        }
+    }
+
+    func retryTranscription() async {
+        guard phase == .transcriptionFailed else { return }
+        await beginTranscription()
+    }
+
     func recordAgain() async {
-        guard phase == .review else { return }
+        guard phase == .review || phase == .transcriptReview || phase == .transcriptionFailed else { return }
         cleanup()
         phase = .idle
         await beginRecording()
@@ -164,6 +227,8 @@ final class RecordingController {
     }
 
     func cleanup() {
+        transcriptionSessionID = UUID()
+        transcriptDraft = ""
         durationTask?.cancel()
         durationTask = nil
         audioService.stopPlayback()
@@ -176,6 +241,28 @@ final class RecordingController {
         duration = 0
         discardTemporaryFile()
         phase = .idle
+    }
+
+    private func stopPlaybackForTransition() {
+        audioService.stopPlayback()
+        isPlaying = false
+    }
+
+    private func localizedMessage(for error: SpeechTranscriptionError) -> String {
+        switch error {
+        case .unavailable:
+            String(localized: "Speech transcription is unavailable on this device.")
+        case .unsupportedLanguage:
+            String(localized: "The selected language is unavailable.")
+        case .assetUnavailable, .assetPreparationFailed:
+            String(localized: "Speech resources could not be prepared. Please try again.")
+        case .audioDecodeFailed:
+            String(localized: "The recording could not be read. Please record again.")
+        case .transcriptionFailed:
+            String(localized: "Transcription failed. Please try again.")
+        case .emptyTranscript:
+            String(localized: "No speech was detected. Please try again.")
+        }
     }
 
     func clearUserMessage() {
