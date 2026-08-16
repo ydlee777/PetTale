@@ -28,6 +28,7 @@
 		C00000000000000000000013 /* RecordingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000003 /* RecordingFlowView.swift */; };
 		C00000000000000000000014 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000004 /* InfoPlist.xcstrings */; };
 		C00000000000000000000015 /* RecordingControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000005 /* RecordingControllerTests.swift */; };
+		D00000000000000000000011 /* SpeechTranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000001 /* SpeechTranscriptionService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,6 +67,7 @@
 		C00000000000000000000003 /* RecordingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingFlowView.swift; sourceTree = "<group>"; };
 		C00000000000000000000004 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		C00000000000000000000005 /* RecordingControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingControllerTests.swift; sourceTree = "<group>"; };
+		D00000000000000000000001 /* SpeechTranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechTranscriptionService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -161,6 +163,7 @@
 			children = (
 				C00000000000000000000001 /* RecordingController.swift */,
 				C00000000000000000000002 /* AVAudioRecordingService.swift */,
+				D00000000000000000000001 /* SpeechTranscriptionService.swift */,
 			);
 			path = Audio;
 			sourceTree = "<group>";
@@ -284,6 +287,7 @@
 				C00000000000000000000011 /* RecordingController.swift in Sources */,
 				C00000000000000000000012 /* AVAudioRecordingService.swift in Sources */,
 				C00000000000000000000013 /* RecordingFlowView.swift in Sources */,
+				D00000000000000000000011 /* SpeechTranscriptionService.swift in Sources */,
 				A00000000000000000000014 /* PetSpecies.swift in Sources */,
 				A00000000000000000000015 /* PetSex.swift in Sources */,
 				A00000000000000000000016 /* PetValidationError.swift in Sources */,

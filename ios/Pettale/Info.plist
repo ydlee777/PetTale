@@ -22,6 +22,8 @@
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Pettale uses the microphone to turn your voice into your pet's daily record.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Pettale transcribes your voice note on your device so you can review your pet's daily record.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>

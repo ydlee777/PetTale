@@ -25,7 +25,7 @@ struct RecordingFlowView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    if controller.phase == .review {
+                    if controller.phase == .review || controller.phase == .transcriptReview || controller.phase == .transcriptionFailed {
                         Button("Discard", role: .destructive, action: discardAndClose)
                             .accessibilityLabel("Discard recording")
                     } else if controller.phase != .recording {
@@ -64,6 +64,14 @@ struct RecordingFlowView: View {
             recordingContent
         case .review:
             reviewContent
+        case .preparingTranscription:
+            transcriptionProgressContent(title: "Preparing transcription")
+        case .transcribing:
+            transcriptionProgressContent(title: "Transcribing")
+        case .transcriptReview:
+            transcriptReviewContent
+        case .transcriptionFailed:
+            transcriptionFailureContent
         case .permissionDenied:
             permissionDeniedContent
         case .failed:
@@ -117,13 +125,81 @@ struct RecordingFlowView: View {
                 Task { await controller.recordAgain() }
             }
             .accessibilityLabel("Discard and record again")
-            Button("Continue") {}
+            Picker("Spoken Language", selection: $controller.transcriptionLanguage) {
+                ForEach(TranscriptionLanguage.allCases) { language in
+                    Text(language.localizedName).tag(language)
+                }
+            }
+            .pickerStyle(.segmented)
+            .accessibilityHint("Select the language spoken in this recording")
+            Button("Continue") {
+                Task { await controller.beginTranscription() }
+            }
                 .buttonStyle(.borderedProminent)
-                .disabled(true)
-                .accessibilityHint("Transcription will be added in the next development step")
-            Text("Transcription is coming in the next step.")
+                .accessibilityHint("Transcribe this recording")
+        }
+    }
+
+    private func transcriptionProgressContent(title: LocalizedStringKey) -> some View {
+        VStack(spacing: 18) {
+            ProgressView()
+                .controlSize(.large)
+            Text(title)
+                .font(.title2.bold())
+                .accessibilityAddTraits(.updatesFrequently)
+            Text("This may take a moment while speech resources are prepared.")
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.secondary)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private var transcriptReviewContent: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Text("Here's what I heard")
+                .font(.title2.bold())
+            TextEditor(text: $controller.transcriptDraft)
+                .frame(minHeight: 180)
+                .padding(8)
+                .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
+                .accessibilityLabel("Edit Transcript")
+                .accessibilityHint("Review and correct the generated transcript")
+            HStack {
+                Button("Record Again", systemImage: "arrow.counterclockwise") {
+                    Task { await controller.recordAgain() }
+                }
+                .accessibilityHint("Deletes this transcript and recording")
+                Spacer()
+                Button("Continue") {}
+                    .buttonStyle(.borderedProminent)
+                    .disabled(true)
+                    .accessibilityHint("Event extraction will be added in the next development step")
+            }
+            Text("Your transcript is a draft and has not been saved.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
+        }
+    }
+
+    private var transcriptionFailureContent: some View {
+        VStack(spacing: 18) {
+            Image(systemName: "waveform.badge.exclamationmark")
+                .font(.system(size: 56))
+                .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
+            Text("Transcription failed")
+                .font(.title2.bold())
+            Text(controller.userMessage ?? String(localized: "Transcription failed. Please try again."))
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.secondary)
+            Button("Try Again") {
+                Task { await controller.retryTranscription() }
+            }
+            .buttonStyle(.borderedProminent)
+            .accessibilityHint("Retry transcription using the selected language")
+            Button("Record Again") {
+                Task { await controller.recordAgain() }
+            }
         }
     }
 

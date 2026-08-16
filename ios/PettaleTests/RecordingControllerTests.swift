@@ -143,15 +143,180 @@ final class RecordingControllerTests: XCTestCase {
         XCTAssertEqual(RecordingController.formattedDuration(65), "01:05")
     }
 
+    func testAudioReviewStartsTranscription() async {
+        let speech = FakeSpeechTranscriptionService()
+        let controller = makeController(service: FakeAudioRecordingService(), transcriptionService: speech)
+        await controller.beginRecording()
+        controller.finishRecording()
+        await controller.beginTranscription()
+        XCTAssertEqual(speech.callCount, 1)
+    }
+
+    func testPreparingTranscriptionState() async {
+        let speech = FakeSpeechTranscriptionService()
+        speech.progressStates = [.preparing]
+        speech.suspends = true
+        let controller = makeController(service: FakeAudioRecordingService(), transcriptionService: speech)
+        await controller.beginRecording()
+        controller.finishRecording()
+        let task = Task { await controller.beginTranscription() }
+        await Task.yield()
+        XCTAssertEqual(controller.phase, .preparingTranscription)
+        speech.resume(at: 0, with: .success("Oreo ate."))
+        await task.value
+    }
+
+    func testTranscribingState() async {
+        let speech = FakeSpeechTranscriptionService()
+        speech.progressStates = [.preparing, .transcribing]
+        speech.suspends = true
+        let controller = makeController(service: FakeAudioRecordingService(), transcriptionService: speech)
+        await controller.beginRecording()
+        controller.finishRecording()
+        let task = Task { await controller.beginTranscription() }
+        await Task.yield()
+        XCTAssertEqual(controller.phase, .transcribing)
+        speech.resume(at: 0, with: .success("Oreo ate."))
+        await task.value
+    }
+
+    func testSuccessfulTranscriptBecomesEditableDraft() async {
+        let speech = FakeSpeechTranscriptionService()
+        speech.result = .success("오늘 오레오가 잘 먹었어.")
+        let controller = makeController(service: FakeAudioRecordingService(), transcriptionService: speech)
+        await controller.beginRecording()
+        controller.finishRecording()
+        await controller.beginTranscription()
+        XCTAssertEqual(controller.phase, .transcriptReview)
+        XCTAssertEqual(controller.transcriptDraft, "오늘 오레오가 잘 먹었어.")
+        controller.transcriptDraft = "오늘 오레오가 밥을 잘 먹었어."
+        XCTAssertEqual(controller.transcriptDraft, "오늘 오레오가 밥을 잘 먹었어.")
+        controller.cleanup()
+    }
+
+    func testEmptyTranscriptShowsNoSpeechFailure() async {
+        let speech = FakeSpeechTranscriptionService()
+        speech.result = .failure(SpeechTranscriptionError.emptyTranscript)
+        let controller = makeController(service: FakeAudioRecordingService(), transcriptionService: speech)
+        await controller.beginRecording()
+        controller.finishRecording()
+        await controller.beginTranscription()
+        XCTAssertEqual(controller.phase, .transcriptionFailed)
+        XCTAssertEqual(controller.userMessage, String(localized: "No speech was detected. Please try again."))
+        controller.cleanup()
+    }
+
+    func testTranscriptionFailureAndRetry() async {
+        let speech = FakeSpeechTranscriptionService()
+        speech.result = .failure(SpeechTranscriptionError.transcriptionFailed)
+        let controller = makeController(service: FakeAudioRecordingService(), transcriptionService: speech)
+        await controller.beginRecording()
+        controller.finishRecording()
+        await controller.beginTranscription()
+        XCTAssertEqual(controller.phase, .transcriptionFailed)
+        speech.result = .success("Oreo played.")
+        await controller.retryTranscription()
+        XCTAssertEqual(speech.callCount, 2)
+        XCTAssertEqual(controller.phase, .transcriptReview)
+        XCTAssertEqual(controller.transcriptDraft, "Oreo played.")
+        controller.cleanup()
+    }
+
+    func testRecordAgainFromTranscriptClearsDraftAndAudio() async throws {
+        let controller = makeController(service: FakeAudioRecordingService())
+        await controller.beginRecording()
+        let oldURL = try XCTUnwrap(controller.temporaryAudioURL)
+        controller.finishRecording()
+        await controller.beginTranscription()
+        await controller.recordAgain()
+        XCTAssertEqual(controller.transcriptDraft, "")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: oldURL.path))
+        XCTAssertEqual(controller.phase, .recording)
+        controller.cleanup()
+    }
+
+    func testDiscardFromTranscriptClearsDraftAndAudio() async throws {
+        let controller = makeController(service: FakeAudioRecordingService())
+        await controller.beginRecording()
+        let url = try XCTUnwrap(controller.temporaryAudioURL)
+        controller.finishRecording()
+        await controller.beginTranscription()
+        controller.discard()
+        XCTAssertEqual(controller.transcriptDraft, "")
+        XCTAssertNil(controller.temporaryAudioURL)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
+    }
+
+    func testPetAssociationSurvivesTranscription() async {
+        let petID = UUID()
+        let controller = makeController(petID: petID, service: FakeAudioRecordingService())
+        await controller.beginRecording()
+        controller.finishRecording()
+        await controller.beginTranscription()
+        XCTAssertEqual(controller.petID, petID)
+        XCTAssertEqual(controller.petName, "Oreo")
+        controller.cleanup()
+    }
+
+    func testCancelledStaleTranscriptionCannotOverwriteNewSession() async {
+        let speech = FakeSpeechTranscriptionService()
+        speech.suspends = true
+        let controller = makeController(service: FakeAudioRecordingService(), transcriptionService: speech)
+        await controller.beginRecording()
+        controller.finishRecording()
+        let oldTask = Task { await controller.beginTranscription() }
+        await Task.yield()
+        controller.cleanup()
+        await controller.beginRecording()
+        controller.finishRecording()
+        let newTask = Task { await controller.beginTranscription() }
+        await Task.yield()
+        speech.resume(at: 1, with: .success("New transcript"))
+        await newTask.value
+        speech.resume(at: 0, with: .success("Stale transcript"))
+        await oldTask.value
+        XCTAssertEqual(controller.transcriptDraft, "New transcript")
+        XCTAssertEqual(controller.phase, .transcriptReview)
+        controller.cleanup()
+    }
+
     private func makeController(
         petID: UUID = UUID(),
-        service: FakeAudioRecordingService
+        service: FakeAudioRecordingService,
+        transcriptionService: FakeSpeechTranscriptionService = FakeSpeechTranscriptionService()
     ) -> RecordingController {
         RecordingController(
             petID: petID,
             petName: "Oreo",
-            audioService: service
+            audioService: service,
+            transcriptionService: transcriptionService
         )
+    }
+}
+
+@MainActor
+private final class FakeSpeechTranscriptionService: SpeechTranscriptionService {
+    var result: Result<String, Error> = .success("Oreo ate well.")
+    var progressStates: [SpeechTranscriptionProgress] = [.preparing, .transcribing]
+    var callCount = 0
+    private var continuations: [CheckedContinuation<String, Error>] = []
+    var suspends = false
+
+    func transcribe(
+        audioURL: URL,
+        locale: Locale,
+        progress: @escaping (SpeechTranscriptionProgress) -> Void
+    ) async throws -> String {
+        callCount += 1
+        progressStates.forEach(progress)
+        if suspends {
+            return try await withCheckedThrowingContinuation { continuations.append($0) }
+        }
+        return try result.get()
+    }
+
+    func resume(at index: Int, with result: Result<String, Error>) {
+        continuations[index].resume(with: result)
     }
 }
 

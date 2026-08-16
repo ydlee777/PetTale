@@ -161,6 +161,16 @@
         }
       }
     },
+    "Deletes this transcript and recording" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 대화 내용과 녹음을 삭제합니다"
+          }
+        }
+      }
+    },
     "Discard" : {
       "localizations" : {
         "ko" : {
@@ -233,6 +243,37 @@
         }
       }
     },
+    "Edit Transcript" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "대화 내용 편집"
+          }
+        }
+      }
+    },
+    "English" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "영어"
+          }
+        }
+      }
+    },
+    "Event extraction will be added in the next development step" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이벤트 추출은 다음 개발 단계에서 추가됩니다"
+          }
+        }
+      }
+    },
     "Every pet has a tale." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -264,6 +305,38 @@
         }
       }
     },
+    "Here's what I heard" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이렇게 들었어요"
+          }
+        }
+      }
+    },
+    "Korean" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "한국어"
+          }
+        }
+      }
+    },
+    "Language unavailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "언어를 사용할 수 없음"
+          }
+        }
+      }
+    },
     "Male" : {
       "localizations" : {
         "ko" : {
@@ -290,6 +363,27 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "이름"
+          }
+        }
+      }
+    },
+    "No speech detected" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "음성이 감지되지 않음"
+          }
+        }
+      }
+    },
+    "No speech was detected. Please try again." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "음성이 감지되지 않았습니다. 다시 시도해 주세요."
           }
         }
       }
@@ -444,6 +538,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "사진 준비 중"
+          }
+        }
+      }
+    },
+    "Preparing transcription" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "받아쓰기 준비 중"
           }
         }
       }
@@ -610,6 +714,26 @@
         }
       }
     },
+    "Retry transcription using the selected language" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택한 언어로 받아쓰기를 다시 시도합니다"
+          }
+        }
+      }
+    },
+    "Review and correct the generated transcript" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "생성된 대화 내용을 검토하고 수정하세요"
+          }
+        }
+      }
+    },
     "Save" : {
       "localizations" : {
         "ko" : {
@@ -626,6 +750,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "반려동물 저장"
+          }
+        }
+      }
+    },
+    "Select the language spoken in this recording" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 녹음에서 사용한 언어를 선택하세요"
           }
         }
       }
@@ -670,6 +804,47 @@
         }
       }
     },
+    "Speech resources could not be prepared. Please try again." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "음성 리소스를 준비할 수 없습니다. 다시 시도해 주세요."
+          }
+        }
+      }
+    },
+    "Speech transcription is unavailable on this device." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 기기에서는 음성 받아쓰기를 사용할 수 없습니다."
+          }
+        }
+      }
+    },
+    "Speech unavailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "음성 기능을 사용할 수 없음"
+          }
+        }
+      }
+    },
+    "Spoken Language" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "말한 언어"
+          }
+        }
+      }
+    },
     "Stop" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -702,6 +877,26 @@
         }
       }
     },
+    "The recording could not be read. Please record again." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "녹음을 읽을 수 없습니다. 다시 녹음해 주세요."
+          }
+        }
+      }
+    },
+    "The selected language is unavailable." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택한 언어를 사용할 수 없습니다."
+          }
+        }
+      }
+    },
     "The selected photo could not be prepared." : {
       "localizations" : {
         "ko" : {
@@ -712,7 +907,58 @@
         }
       }
     },
+    "This may take a moment while speech resources are prepared." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "음성 리소스를 준비하는 동안 잠시 기다려 주세요."
+          }
+        }
+      }
+    },
+    "Transcribe this recording" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 녹음을 받아씁니다"
+          }
+        }
+      }
+    },
+    "Transcribing" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "받아쓰는 중"
+          }
+        }
+      }
+    },
+    "Transcription failed" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "받아쓰기 실패"
+          }
+        }
+      }
+    },
+    "Transcription failed. Please try again." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "받아쓰기에 실패했습니다. 다시 시도해 주세요."
+          }
+        }
+      }
+    },
     "Transcription is coming in the next step." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -723,6 +969,7 @@
       }
     },
     "Transcription will be added in the next development step" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -778,6 +1025,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "변경사항을 저장할 수 없습니다. 다시 시도해 주세요."
+          }
+        }
+      }
+    },
+    "Your transcript is a draft and has not been saved." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "대화 내용은 임시 초안이며 저장되지 않았습니다."
           }
         }
       }
