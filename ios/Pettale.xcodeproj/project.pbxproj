@@ -29,6 +29,10 @@
 		C00000000000000000000014 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000004 /* InfoPlist.xcstrings */; };
 		C00000000000000000000015 /* RecordingControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000005 /* RecordingControllerTests.swift */; };
 		D00000000000000000000011 /* SpeechTranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000001 /* SpeechTranscriptionService.swift */; };
+		E00000000000000000000011 /* EventCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000000000000000000001 /* EventCategory.swift */; };
+		E00000000000000000000012 /* PetRecordValidationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000000000000000000002 /* PetRecordValidationError.swift */; };
+		E00000000000000000000013 /* PettaleSchemaV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000000000000000000003 /* PettaleSchemaV2.swift */; };
+		E00000000000000000000014 /* PetRecordPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000000000000000000004 /* PetRecordPersistenceTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +72,10 @@
 		C00000000000000000000004 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		C00000000000000000000005 /* RecordingControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingControllerTests.swift; sourceTree = "<group>"; };
 		D00000000000000000000001 /* SpeechTranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechTranscriptionService.swift; sourceTree = "<group>"; };
+		E00000000000000000000001 /* EventCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventCategory.swift; sourceTree = "<group>"; };
+		E00000000000000000000002 /* PetRecordValidationError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetRecordValidationError.swift; sourceTree = "<group>"; };
+		E00000000000000000000003 /* PettaleSchemaV2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PettaleSchemaV2.swift; sourceTree = "<group>"; };
+		E00000000000000000000004 /* PetRecordPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetRecordPersistenceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +133,7 @@
 				A00000000000000000000003 /* PetPersistenceTests.swift */,
 				B00000000000000000000007 /* PetProfileTests.swift */,
 				C00000000000000000000005 /* RecordingControllerTests.swift */,
+				E00000000000000000000004 /* PetRecordPersistenceTests.swift */,
 			);
 			path = PettaleTests;
 			sourceTree = "<group>";
@@ -144,6 +153,8 @@
 				A00000000000000000000006 /* PetSpecies.swift */,
 				A00000000000000000000007 /* PetSex.swift */,
 				A00000000000000000000008 /* PetValidationError.swift */,
+				E00000000000000000000001 /* EventCategory.swift */,
+				E00000000000000000000002 /* PetRecordValidationError.swift */,
 			);
 			path = Domain;
 			sourceTree = "<group>";
@@ -152,6 +163,7 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000009 /* PettaleSchemaV1.swift */,
+				E00000000000000000000003 /* PettaleSchemaV2.swift */,
 				A0000000000000000000000A /* PettaleMigrationPlan.swift */,
 				A0000000000000000000000B /* PettalePersistence.swift */,
 			);
@@ -291,7 +303,10 @@
 				A00000000000000000000014 /* PetSpecies.swift in Sources */,
 				A00000000000000000000015 /* PetSex.swift in Sources */,
 				A00000000000000000000016 /* PetValidationError.swift in Sources */,
+				E00000000000000000000011 /* EventCategory.swift in Sources */,
+				E00000000000000000000012 /* PetRecordValidationError.swift in Sources */,
 				A00000000000000000000017 /* PettaleSchemaV1.swift in Sources */,
+				E00000000000000000000013 /* PettaleSchemaV2.swift in Sources */,
 				A00000000000000000000018 /* PettaleMigrationPlan.swift in Sources */,
 				A00000000000000000000019 /* PettalePersistence.swift in Sources */,
 			);
@@ -304,6 +319,7 @@
 				A00000000000000000000013 /* PetPersistenceTests.swift in Sources */,
 				B00000000000000000000017 /* PetProfileTests.swift in Sources */,
 				C00000000000000000000015 /* RecordingControllerTests.swift in Sources */,
+				E00000000000000000000014 /* PetRecordPersistenceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
