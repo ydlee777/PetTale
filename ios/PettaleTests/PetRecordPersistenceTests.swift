@@ -9,15 +9,27 @@ final class PetRecordPersistenceTests: XCTestCase {
         try PettalePersistence.makeModelContainer(inMemory: true, cloudKitEnabled: false)
     }
 
-    func testV2SchemaAndContainerInitialize() throws {
+    func testV3SchemaAndContainerInitialize() throws {
         let container = try makeContainer()
-        XCTAssertEqual(PettaleSchemaV2.versionIdentifier, Schema.Version(2, 0, 0))
-        XCTAssertEqual(PettaleSchemaV2.models.count, 3)
-        XCTAssertEqual(PettaleMigrationPlan.schemas.count, 2)
-        XCTAssertEqual(PettaleMigrationPlan.stages.count, 1)
+        XCTAssertEqual(PettaleSchemaV3.versionIdentifier, Schema.Version(3, 0, 0))
+        XCTAssertEqual(PettaleSchemaV3.models.count, 3)
+        XCTAssertEqual(PettaleMigrationPlan.schemas.count, 3)
+        XCTAssertEqual(PettaleMigrationPlan.stages.count, 2)
         XCTAssertNotNil(container.schema.entity(for: Pet.self))
         XCTAssertNotNil(container.schema.entity(for: PetRecord.self))
         XCTAssertNotNil(container.schema.entity(for: PetEvent.self))
+    }
+
+    func testCloudKitCompatibleContainerInitializes() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appending(path: UUID().uuidString, directoryHint: .isDirectory)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        XCTAssertNoThrow(try PettalePersistence.makeModelContainer(
+            cloudKitEnabled: true,
+            storeURL: directory.appending(path: "CloudKitCompatible.store")
+        ))
     }
 
     func testPetRecordCreationAndTranscriptPersistence() throws {
@@ -182,7 +194,7 @@ final class PetRecordPersistenceTests: XCTestCase {
         context.insert(try PetEvent(record: record, category: .food, eventType: "ATE_WELL"))
         context.insert(try PetEvent(record: record, category: .activity, eventType: "PLAY"))
         try context.save()
-        XCTAssertEqual(record.events.count, 2)
+        XCTAssertEqual(record.events?.count, 2)
     }
 
     func testDeletingRecordCascadesEventsWithoutOrphans() throws {
@@ -199,7 +211,7 @@ final class PetRecordPersistenceTests: XCTestCase {
         try context.save()
         XCTAssertTrue(try context.fetch(FetchDescriptor<PetRecord>()).isEmpty)
         XCTAssertTrue(try context.fetch(FetchDescriptor<PetEvent>()).isEmpty)
-        XCTAssertEqual(pet.records.count, 0)
+        XCTAssertEqual(pet.records?.count, 0)
     }
 
     func testDeletingPetCascadesOwnedHistory() throws {
@@ -234,14 +246,15 @@ final class PetRecordPersistenceTests: XCTestCase {
         context.insert(try PetEvent(record: creamyRecord, category: .weight, numericValue: 4.1, unit: "KG"))
         try context.save()
 
-        let weights = oreo.records
-            .flatMap(\.events)
+        let oreoRecords: [PetRecord] = oreo.records ?? []
+        let oreoEvents: [PetEvent] = oreoRecords.flatMap { $0.events ?? [] }
+        let weights = oreoEvents
             .filter { $0.category == .weight }
             .sorted { $0.occurredAt < $1.occurredAt }
         XCTAssertEqual(weights.count, 1)
         XCTAssertEqual(weights.first?.numericValue, 6.2)
-        XCTAssertEqual(oreo.records.count, 1)
-        XCTAssertEqual(creamy.records.count, 1)
+        XCTAssertEqual(oreo.records?.count, 1)
+        XCTAssertEqual(creamy.records?.count, 1)
     }
 
     func testRealV1StoreMigratesToV2AndAcceptsNewModels() throws {
@@ -300,5 +313,31 @@ final class PetRecordPersistenceTests: XCTestCase {
         try context.save()
         XCTAssertEqual(try context.fetch(FetchDescriptor<PetRecord>()).count, 1)
         XCTAssertEqual(try context.fetch(FetchDescriptor<PetEvent>()).count, 1)
+    }
+
+    func testExistingV2StoreMigratesToCloudKitCompatibleV3() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appending(path: UUID().uuidString, directoryHint: .isDirectory)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let storeURL = directory.appending(path: "PettaleV2.store")
+        let petID = UUID()
+
+        do {
+            let schema = Schema(versionedSchema: PettaleSchemaV2.self)
+            let configuration = ModelConfiguration("PettalePrivateData", schema: schema, url: storeURL, cloudKitDatabase: .none)
+            let container = try ModelContainer(for: schema, configurations: [configuration])
+            let pet = try PettaleSchemaV2.Pet(id: petID, name: "Oreo", species: .cat)
+            let record = try PettaleSchemaV2.PetRecord(pet: pet, originalTranscript: "Existing V2 record")
+            container.mainContext.insert(pet)
+            container.mainContext.insert(record)
+            try container.mainContext.save()
+        }
+
+        let migrated = try PettalePersistence.makeModelContainer(cloudKitEnabled: false, storeURL: storeURL)
+        let pets = try migrated.mainContext.fetch(FetchDescriptor<Pet>())
+        let records = try migrated.mainContext.fetch(FetchDescriptor<PetRecord>())
+        XCTAssertEqual(pets.first?.id, petID)
+        XCTAssertEqual(records.first?.originalTranscript, "Existing V2 record")
     }
 }

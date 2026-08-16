@@ -6,6 +6,8 @@ struct HomeView: View {
     @State private var selectedPetID: UUID?
     @State private var presentedForm: PresentedPetForm?
     @State private var recordingPet: RecordingPet?
+    @State private var authentication = AuthenticationController()
+    @State private var isAccountPresented = false
 
     init(pets: [Pet]) {
         self.pets = pets
@@ -47,6 +49,10 @@ struct HomeView: View {
                     }
                     .accessibilityLabel("Add Pet")
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Account", systemImage: "person.crop.circle") { isAccountPresented = true }
+                        .accessibilityLabel("Pettale Account")
+                }
             }
             .sheet(item: $presentedForm) { form in
                 NavigationStack {
@@ -62,6 +68,9 @@ struct HomeView: View {
                 RecordingFlowView(petID: pet.id, petName: pet.name) {
                     recordingPet = nil
                 }
+            }
+            .sheet(isPresented: $isAccountPresented) {
+                NavigationStack { AuthenticationView(controller: authentication) }
             }
         }
     }

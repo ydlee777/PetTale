@@ -1,8 +1,8 @@
 import Foundation
 import SwiftData
 
-enum PettaleSchemaV2: VersionedSchema {
-    static let versionIdentifier = Schema.Version(2, 0, 0)
+enum PettaleSchemaV3: VersionedSchema {
+    static let versionIdentifier = Schema.Version(3, 0, 0)
     static let models: [any PersistentModel.Type] = [Pet.self, PetRecord.self, PetEvent.self]
 
     @Model
@@ -18,7 +18,7 @@ enum PettaleSchemaV2: VersionedSchema {
         private(set) var createdAt: Date = Date()
         private(set) var updatedAt: Date = Date()
         @Relationship(deleteRule: .cascade, inverse: \PetRecord.pet)
-        private(set) var records: [PetRecord] = []
+        private(set) var records: [PetRecord]? = []
 
         var species: PetSpecies {
             get { PetSpecies(rawValue: speciesRawValue) ?? .other }
@@ -100,7 +100,7 @@ enum PettaleSchemaV2: VersionedSchema {
         private(set) var createdAt: Date = Date()
         private(set) var updatedAt: Date = Date()
         @Relationship(deleteRule: .cascade, inverse: \PetEvent.record)
-        private(set) var events: [PetEvent] = []
+        private(set) var events: [PetEvent]? = []
 
         init(
             id: UUID = UUID(),
@@ -223,3 +223,7 @@ enum PettaleSchemaV2: VersionedSchema {
         }
     }
 }
+
+typealias Pet = PettaleSchemaV3.Pet
+typealias PetRecord = PettaleSchemaV3.PetRecord
+typealias PetEvent = PettaleSchemaV3.PetEvent
