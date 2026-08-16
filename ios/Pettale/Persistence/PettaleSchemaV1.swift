@@ -92,4 +92,4 @@ enum PettaleSchemaV1: VersionedSchema {
     }
 }
 
-typealias Pet = PettaleSchemaV1.Pet
+typealias PetV1 = PettaleSchemaV1.Pet

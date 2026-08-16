@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Activity" : {
+      "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "활동" } } }
+    },
     "Add Pet" : {
       "localizations" : {
         "ko" : {
@@ -407,6 +410,33 @@
           }
         }
       }
+    },
+    "Behavior" : {
+      "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "행동" } } }
+    },
+    "Event" : {
+      "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "이벤트" } } }
+    },
+    "Food" : {
+      "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "식사" } } }
+    },
+    "Grooming" : {
+      "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "미용" } } }
+    },
+    "Health" : {
+      "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "건강" } } }
+    },
+    "Medication" : {
+      "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "투약" } } }
+    },
+    "Sleep" : {
+      "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "수면" } } }
+    },
+    "Vet" : {
+      "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "동물병원" } } }
+    },
+    "Weight" : {
+      "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "체중" } } }
     },
     "Other" : {
       "localizations" : {
