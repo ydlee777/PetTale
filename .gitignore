@@ -1,0 +1,34 @@
+# macOS
+.DS_Store
+
+# Xcode / Swift
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+*.xccheckout
+*.xcscmblueprint
+.swiftpm/
+
+# Java / Maven
+backend/target/
+*.class
+*.log
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+application-local.yml
+application-local.yaml
+application-local.properties
+*.p12
+*.p8
+*.pem
+*.key
+

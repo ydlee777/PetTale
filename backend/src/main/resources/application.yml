@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: pettale-backend
+  datasource:
+    url: ${PETTALE_DB_URL:jdbc:postgresql://localhost:5432/pettale}
+    username: ${PETTALE_DB_USERNAME:pettale}
+    password: ${PETTALE_DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
