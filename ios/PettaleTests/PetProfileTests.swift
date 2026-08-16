@@ -90,8 +90,79 @@ final class PetProfileTests: XCTestCase {
     func testPhotoCanBeRemovedThroughEditForm() throws {
         let pet = try Pet(name: "Momo", species: .cat, profilePhotoData: Data([1, 2, 3]))
         var form = PetFormState(pet: pet)
-        form.profilePhotoData = nil
+        form.removeProfilePhoto()
         try form.apply(to: pet, at: Date(timeIntervalSince1970: 300))
+        XCTAssertNil(pet.profilePhotoData)
+    }
+
+    func testReplacementPhotoChangesDraftPreviewWithoutMutatingPet() throws {
+        let original = Data([1, 2, 3])
+        let replacement = Data([4, 5, 6])
+        let pet = try Pet(name: "Momo", species: .cat, profilePhotoData: original)
+        var form = PetFormState(pet: pet)
+        form.selectProfilePhoto(replacement)
+        XCTAssertEqual(form.profilePhotoData, replacement)
+        XCTAssertEqual(pet.profilePhotoData, original)
+    }
+
+    func testCancelAfterReplacementPreservesOriginalPhoto() throws {
+        let original = Data([1, 2, 3])
+        let pet = try Pet(name: "Momo", species: .cat, profilePhotoData: original)
+        var form: PetFormState? = PetFormState(pet: pet)
+        form?.selectProfilePhoto(Data([4, 5, 6]))
+        form = nil
+        XCTAssertNil(form)
+        XCTAssertEqual(pet.profilePhotoData, original)
+    }
+
+    func testSaveAfterReplacementPersistsNewPhoto() throws {
+        let replacement = Data([4, 5, 6])
+        let pet = try Pet(name: "Momo", species: .cat, profilePhotoData: Data([1, 2, 3]))
+        var form = PetFormState(pet: pet)
+        form.selectProfilePhoto(replacement)
+        try form.apply(to: pet, at: Date(timeIntervalSince1970: 400))
+        XCTAssertEqual(pet.profilePhotoData, replacement)
+    }
+
+    func testRemovePhotoOnlyChangesDraftUntilSave() throws {
+        let original = Data([1, 2, 3])
+        let pet = try Pet(name: "Momo", species: .cat, profilePhotoData: original)
+        var form = PetFormState(pet: pet)
+        form.removeProfilePhoto()
+        XCTAssertNil(form.profilePhotoData)
+        XCTAssertEqual(pet.profilePhotoData, original)
+    }
+
+    func testCancelAfterRemovalPreservesOriginalPhoto() throws {
+        let original = Data([1, 2, 3])
+        let pet = try Pet(name: "Momo", species: .cat, profilePhotoData: original)
+        var form: PetFormState? = PetFormState(pet: pet)
+        form?.removeProfilePhoto()
+        form = nil
+        XCTAssertEqual(pet.profilePhotoData, original)
+    }
+
+    func testPhotoRemovalRemainsAfterStoreReopen() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appending(path: UUID().uuidString, directoryHint: .isDirectory)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let storeURL = directory.appending(path: "PhotoRemoval.store")
+        let id = UUID()
+
+        do {
+            let container = try PettalePersistence.makeModelContainer(cloudKitEnabled: false, storeURL: storeURL)
+            let pet = try Pet(id: id, name: "Momo", species: .cat, profilePhotoData: Data([1, 2, 3]))
+            container.mainContext.insert(pet)
+            try container.mainContext.save()
+            var form = PetFormState(pet: pet)
+            form.removeProfilePhoto()
+            try form.apply(to: pet)
+            try container.mainContext.save()
+        }
+
+        let reopened = try PettalePersistence.makeModelContainer(cloudKitEnabled: false, storeURL: storeURL)
+        let pet = try XCTUnwrap(reopened.mainContext.fetch(FetchDescriptor<Pet>()).first(where: { $0.id == id }))
         XCTAssertNil(pet.profilePhotoData)
     }
 

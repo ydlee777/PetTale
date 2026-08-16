@@ -14,6 +14,7 @@ struct PetFormView: View {
     let isFirstPet: Bool
     @State private var form: PetFormState
     @State private var pickerItem: PhotosPickerItem?
+    @State private var isPhotoPickerPresented = false
     @State private var errorMessage: String?
     @State private var isLoadingPhoto = false
 
@@ -84,6 +85,7 @@ struct PetFormView: View {
         .task(id: pickerItem) {
             await loadSelectedPhoto()
         }
+        .photosPicker(isPresented: $isPhotoPickerPresented, selection: $pickerItem, matching: .images)
     }
 
     private var navigationTitle: LocalizedStringKey {
@@ -100,11 +102,13 @@ struct PetFormView: View {
                 .accessibilityLabel(form.profilePhotoData == nil ? "Profile photo placeholder" : "Pet profile photo")
             if hasPhoto {
                 Menu {
-                    PhotosPicker(selection: $pickerItem, matching: .images) {
+                    Button {
+                        isPhotoPickerPresented = true
+                    } label: {
                         Label("Choose Photo", systemImage: "photo")
                     }
                     Button("Remove Photo", systemImage: "trash", role: .destructive) {
-                        form.profilePhotoData = nil
+                        form.removeProfilePhoto()
                         pickerItem = nil
                     }
                     .accessibilityLabel("Remove profile photo")
@@ -165,12 +169,22 @@ struct PetFormView: View {
     private func loadSelectedPhoto() async {
         guard let pickerItem else { return }
         isLoadingPhoto = true
-        defer { isLoadingPhoto = false }
+        defer {
+            isLoadingPhoto = false
+            if self.pickerItem == pickerItem {
+                self.pickerItem = nil
+            }
+        }
         do {
             guard let data = try await pickerItem.loadTransferable(type: Data.self) else {
                 throw ProfilePhotoProcessingError.invalidImage
             }
-            form.profilePhotoData = try ProfilePhotoProcessor.process(data)
+            try Task.checkCancellation()
+            let processedPhoto = try ProfilePhotoProcessor.process(data)
+            try Task.checkCancellation()
+            form.selectProfilePhoto(processedPhoto)
+        } catch is CancellationError {
+            // A new selection or explicit removal superseded this load.
         } catch {
             errorMessage = String(localized: "The selected photo could not be prepared.")
         }

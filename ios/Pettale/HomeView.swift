@@ -5,6 +5,7 @@ struct HomeView: View {
     let pets: [Pet]
     @State private var selectedPetID: UUID?
     @State private var presentedForm: PresentedPetForm?
+    @State private var recordingPet: RecordingPet?
 
     init(pets: [Pet]) {
         self.pets = pets
@@ -19,9 +20,13 @@ struct HomeView: View {
         NavigationStack {
             Group {
                 if let selectedPet {
-                    PetProfileView(pet: selectedPet) {
-                        presentedForm = .edit(selectedPet)
-                    }
+                    PetProfileView(
+                        pet: selectedPet,
+                        recordAction: {
+                            recordingPet = RecordingPet(id: selectedPet.id, name: selectedPet.name)
+                        },
+                        editAction: { presentedForm = .edit(selectedPet) }
+                    )
                 }
             }
             .navigationTitle("Pettale")
@@ -53,6 +58,11 @@ struct HomeView: View {
                     }
                 }
             }
+            .fullScreenCover(item: $recordingPet) { pet in
+                RecordingFlowView(petID: pet.id, petName: pet.name) {
+                    recordingPet = nil
+                }
+            }
         }
     }
 
@@ -62,6 +72,11 @@ struct HomeView: View {
             set: { selectedPetID = $0 }
         )
     }
+}
+
+private struct RecordingPet: Identifiable {
+    let id: UUID
+    let name: String
 }
 
 private enum PresentedPetForm: Identifiable {
