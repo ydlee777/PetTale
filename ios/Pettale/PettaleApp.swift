@@ -15,7 +15,7 @@ struct PettaleApp: App {
 
     var body: some Scene {
         WindowGroup {
-            HomeView()
+            RootView()
         }
         .modelContainer(modelContainer)
     }
