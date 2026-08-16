@@ -7,7 +7,7 @@ Pettale keeps pet profiles and history in the iOS SwiftData/CloudKit boundary. S
 1. The iOS app creates a cryptographically random nonce and sends its SHA-256 hash with the native `AuthenticationServices` authorization request.
 2. The app sends Apple's identity token and the original nonce to `POST /api/v1/auth/apple`.
 3. The backend verifies the token signature with Apple's JWK set and validates expiration, issuer, audience, subject, and nonce. Only a verified email claim may be captured; Apple subject is the external identity key.
-4. The backend resolves or creates one `service_user` and returns a Pettale HS256 JWT whose subject is the internal user UUID. The default lifetime is 15 minutes.
+4. The backend resolves or creates one `service_user` and returns a Pettale HS256 JWT whose subject is the internal user UUID. The V1 default lifetime is 30 days and remains configurable.
 5. iOS stores only the Pettale session in a device-only Keychain item. Sign out removes it; Apple tokens and nonces are not persisted.
 
 The health endpoint and Apple authentication entry point are public. Every other backend endpoint requires a valid Pettale bearer token. Tokens, nonces, and signing material must not be logged.

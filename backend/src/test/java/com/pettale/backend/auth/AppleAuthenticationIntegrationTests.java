@@ -49,6 +49,9 @@ class AppleAuthenticationIntegrationTests {
         var response = post("/api/v1/auth/apple", "{\"identityToken\":\"valid\",\"nonce\":\"nonce\"}", null);
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.body()).contains("accessToken", "userId", "expiresAt");
+        assertThat(Instant.parse(extract(response.body(), "expiresAt")))
+                .isBetween(Instant.now().plusSeconds(29L * 24 * 60 * 60),
+                        Instant.now().plusSeconds(31L * 24 * 60 * 60));
         assertThat(users.count()).isEqualTo(1);
         assertThat(users.findByAppleSubject("apple-1").orElseThrow().getEmail()).isEqualTo("relay@example.com");
     }
