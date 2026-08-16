@@ -4,10 +4,21 @@ import UIKit
 struct RecordingFlowView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var controller: RecordingController
+    @State private var isAuthenticationPresented = false
+    let knownPetNames: [String]
+    let authentication: AuthenticationController
     let close: () -> Void
 
-    init(petID: UUID, petName: String, close: @escaping () -> Void) {
+    init(
+        petID: UUID,
+        petName: String,
+        knownPetNames: [String],
+        authentication: AuthenticationController,
+        close: @escaping () -> Void
+    ) {
         _controller = State(initialValue: RecordingController(petID: petID, petName: petName))
+        self.knownPetNames = knownPetNames
+        self.authentication = authentication
         self.close = close
     }
 
@@ -25,7 +36,7 @@ struct RecordingFlowView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    if controller.phase == .review || controller.phase == .transcriptReview || controller.phase == .transcriptionFailed {
+                    if controller.phase == .review || controller.phase == .transcriptReview || controller.phase == .transcriptionFailed || controller.phase == .eventDraftReview || controller.phase == .extractionFailed || controller.phase == .authenticationRequired {
                         Button("Discard", role: .destructive, action: discardAndClose)
                             .accessibilityLabel("Discard recording")
                     } else if controller.phase != .recording {
@@ -41,6 +52,15 @@ struct RecordingFlowView: View {
             }
             .onDisappear {
                 controller.cleanup()
+            }
+            .sheet(isPresented: $isAuthenticationPresented) {
+                NavigationStack { AuthenticationView(controller: authentication) }
+            }
+            .onChange(of: authentication.state) { _, state in
+                if case .signedIn(let session) = state, controller.phase == .authenticationRequired {
+                    isAuthenticationPresented = false
+                    Task { await controller.continueToExtraction(session: session, knownPetNames: knownPetNames) }
+                }
             }
             .task {
                 if controller.phase == .idle {
@@ -70,6 +90,14 @@ struct RecordingFlowView: View {
             transcriptionProgressContent(title: "Transcribing")
         case .transcriptReview:
             transcriptReviewContent
+        case .authenticationRequired:
+            authenticationRequiredContent
+        case .extracting:
+            extractionProgressContent
+        case .eventDraftReview:
+            eventDraftReviewContent
+        case .extractionFailed:
+            extractionFailureContent
         case .transcriptionFailed:
             transcriptionFailureContent
         case .permissionDenied:
@@ -170,15 +198,100 @@ struct RecordingFlowView: View {
                 }
                 .accessibilityHint("Deletes this transcript and recording")
                 Spacer()
-                Button("Continue") {}
+                Button("Continue") {
+                    Task { await continueToExtraction() }
+                }
                     .buttonStyle(.borderedProminent)
-                    .disabled(true)
-                    .accessibilityHint("Event extraction will be added in the next development step")
+                    .accessibilityHint("Extract event drafts using the Pettale service")
             }
             Text("Your transcript is a draft and has not been saved.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
+    }
+
+    private var authenticationRequiredContent: some View {
+        VStack(spacing: 18) {
+            Image(systemName: "person.badge.key.fill")
+                .font(.system(size: 52))
+                .foregroundStyle(.tint)
+            Text("Sign in to Extract Events")
+                .font(.title2.bold())
+            Text("Your transcript remains here while you sign in to the Pettale service.")
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.secondary)
+            Button("Sign in with Apple") { isAuthenticationPresented = true }
+                .buttonStyle(.borderedProminent)
+            Button("Back") { controller.returnToTranscriptReview() }
+        }
+    }
+
+    private var extractionProgressContent: some View {
+        VStack(spacing: 18) {
+            ProgressView().controlSize(.large)
+            Text("Finding Events").font(.title2.bold())
+            Text("Pettale is organizing your approved transcript.")
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var eventDraftReviewContent: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                Text("I found \(controller.extractedEvents.count) events")
+                    .font(.title2.bold())
+                ForEach(Array(controller.extractedEvents.enumerated()), id: \.offset) { _, event in
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(event.category.localizedName).font(.headline)
+                        if let eventType = event.eventType { Text(eventType.replacingOccurrences(of: "_", with: " ").capitalized) }
+                        if let value = event.numericValue {
+                            Text("\(value.formatted()) \(event.unit ?? "")")
+                        }
+                        if let count = event.count { Text("Count: \(count)") }
+                        if let minutes = event.durationMinutes { Text("\(minutes) min") }
+                        if let description = event.description { Text(description).foregroundStyle(.secondary) }
+                        Text(event.occurredAt, format: .dateTime.year().month().day().hour().minute())
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
+                }
+                HStack {
+                    Button("Back") { controller.returnToTranscriptReview() }
+                    Spacer()
+                    Button("Continue") {}
+                        .buttonStyle(.borderedProminent)
+                        .disabled(true)
+                        .accessibilityHint("Saving reviewed events will be added in the next step")
+                }
+                Text("These are temporary drafts and have not been saved.")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var extractionFailureContent: some View {
+        VStack(spacing: 18) {
+            Image(systemName: "sparkles.rectangle.stack.fill")
+                .font(.system(size: 52)).foregroundStyle(.secondary)
+            Text(controller.extractionError == .quotaExceeded ? "AI Allowance Used" : "Extraction Failed")
+                .font(.title2.bold())
+            Text(controller.userMessage ?? "Please try again.")
+                .multilineTextAlignment(.center).foregroundStyle(.secondary)
+            if controller.extractionError != .quotaExceeded {
+                Button("Try Again") { Task { await continueToExtraction() } }
+                    .buttonStyle(.borderedProminent)
+            }
+            Button("Back") { controller.returnToTranscriptReview() }
+        }
+    }
+
+    private func continueToExtraction() async {
+        let session: PettaleSession?
+        if case .signedIn(let value) = authentication.state { session = value } else { session = nil }
+        await controller.continueToExtraction(session: session, knownPetNames: knownPetNames)
+        if controller.phase == .authenticationRequired { isAuthenticationPresented = true }
     }
 
     private var transcriptionFailureContent: some View {

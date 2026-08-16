@@ -41,6 +41,7 @@
 		F00000000000000000000015 /* AuthenticationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000005 /* AuthenticationController.swift */; };
 		F00000000000000000000016 /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000006 /* AuthenticationView.swift */; };
 		F00000000000000000000017 /* AuthenticationControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000007 /* AuthenticationControllerTests.swift */; };
+		H00000000000000000000011 /* EventExtractionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = H00000000000000000000001 /* EventExtractionService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -92,6 +93,7 @@
 		F00000000000000000000005 /* AuthenticationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationController.swift; sourceTree = "<group>"; };
 		F00000000000000000000006 /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		F00000000000000000000007 /* AuthenticationControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationControllerTests.swift; sourceTree = "<group>"; };
+		H00000000000000000000001 /* EventExtractionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventExtractionService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +136,7 @@
 				B00000000000000000000003 /* ProfilePhotoProcessor.swift */,
 				C00000000000000000000006 /* Audio */,
 				F00000000000000000000008 /* Authentication */,
+				H00000000000000000000008 /* AI */,
 				A00000000000000000000024 /* Domain */,
 				A00000000000000000000025 /* Persistence */,
 				B00000000000000000000006 /* Localizable.xcstrings */,
@@ -210,6 +213,14 @@
 				F00000000000000000000006 /* AuthenticationView.swift */,
 			);
 			path = Authentication;
+			sourceTree = "<group>";
+		};
+		H00000000000000000000008 /* AI */ = {
+			isa = PBXGroup;
+			children = (
+				H00000000000000000000001 /* EventExtractionService.swift */,
+			);
+			path = AI;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -349,6 +360,7 @@
 				F00000000000000000000014 /* BackendAuthenticationService.swift in Sources */,
 				F00000000000000000000015 /* AuthenticationController.swift in Sources */,
 				F00000000000000000000016 /* AuthenticationView.swift in Sources */,
+				H00000000000000000000011 /* EventExtractionService.swift in Sources */,
 				A00000000000000000000018 /* PettaleMigrationPlan.swift in Sources */,
 				A00000000000000000000019 /* PettalePersistence.swift in Sources */,
 			);

@@ -23,6 +23,10 @@ pettale:
   ai:
     monthly-request-limit: ${PETTALE_AI_MONTHLY_REQUEST_LIMIT:25}
     extraction-model: ${PETTALE_EXTRACTION_MODEL:gpt-5-mini}
+    reservation-timeout: ${PETTALE_AI_RESERVATION_TIMEOUT:PT2M}
+    provider-timeout: ${PETTALE_OPENAI_TIMEOUT:PT30S}
+    openai-api-key: ${PETTALE_OPENAI_API_KEY:}
+    openai-base-url: ${PETTALE_OPENAI_BASE_URL:https://api.openai.com}
 management:
   endpoints:
     web:

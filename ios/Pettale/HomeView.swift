@@ -65,7 +65,12 @@ struct HomeView: View {
                 }
             }
             .fullScreenCover(item: $recordingPet) { pet in
-                RecordingFlowView(petID: pet.id, petName: pet.name) {
+                RecordingFlowView(
+                    petID: pet.id,
+                    petName: pet.name,
+                    knownPetNames: pets.map(\.name),
+                    authentication: authentication
+                ) {
                     recordingPet = nil
                 }
             }
