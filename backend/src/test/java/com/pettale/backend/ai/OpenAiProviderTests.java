@@ -34,6 +34,8 @@ class OpenAiProviderTests {
         var request = json.readTree(capturedBody.get());
         assertThat(request.path("model").asText()).isEqualTo("gpt-5-mini");
         assertThat(request.path("store").asBoolean()).isFalse();
+        assertThat(request.path("reasoning").path("effort").asText()).isEqualTo("minimal");
+        assertThat(request.path("text").path("verbosity").asText()).isEqualTo("low");
         assertThat(request.path("text").path("format").path("type").asText()).isEqualTo("json_schema");
         assertThat(request.path("text").path("format").path("name").asText()).isEqualTo("pettale_event_extraction_v1");
         assertThat(request.path("text").path("format").path("strict").asBoolean()).isTrue();
@@ -61,6 +63,19 @@ class OpenAiProviderTests {
             assertThat(event.numericValue()).isEqualTo(6.2);
             assertThat(event.unit()).isEqualTo("KG");
         });
+    }
+
+    @Test void omitsOptionalOptimizationControlsByDefault() throws Exception {
+        var capturedBody = new AtomicReference<String>();
+        startServer(200, validResponse(), new AtomicReference<>(), capturedBody);
+        var provider = new OpenAiProvider(json, "test-server-key", "gpt-5-mini", "", "",
+                "http://127.0.0.1:" + server.getAddress().getPort(), Duration.ofSeconds(2));
+
+        provider.extractEvents(input());
+
+        var request = json.readTree(capturedBody.get());
+        assertThat(request.has("reasoning")).isFalse();
+        assertThat(request.path("text").has("verbosity")).isFalse();
     }
 
     @Test void findsOutputTextAcrossMultipleTypedOutputAndContentItems() throws Exception {
@@ -134,7 +149,7 @@ class OpenAiProviderTests {
             exchange.close();
         });
         server.start();
-        var slowProvider = new OpenAiProvider(json, "test-server-key", "gpt-5-mini",
+        var slowProvider = new OpenAiProvider(json, "test-server-key", "gpt-5-mini", "minimal", "low",
                 "http://127.0.0.1:" + server.getAddress().getPort(), Duration.ofMillis(50));
         assertThatThrownBy(() -> slowProvider.extractEvents(input()))
                 .isInstanceOf(ProviderFailure.class)
@@ -142,7 +157,7 @@ class OpenAiProviderTests {
     }
 
     private OpenAiProvider provider() {
-        return new OpenAiProvider(json, "test-server-key", "gpt-5-mini",
+        return new OpenAiProvider(json, "test-server-key", "gpt-5-mini", "minimal", "low",
                 "http://127.0.0.1:" + server.getAddress().getPort(), Duration.ofSeconds(2));
     }
 
