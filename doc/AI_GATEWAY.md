@@ -30,6 +30,8 @@ Before counting, reservations older than `PETTALE_AI_RESERVATION_TIMEOUT` (defau
 - `PETTALE_AI_RESERVATION_TIMEOUT`: stale reservation threshold; default `PT2M`.
 - `PETTALE_SESSION_LIFETIME`: Pettale JWT duration; V1 default `P30D`.
 
+For local physical-device and Simulator QA, add `PETTALE_AI_MONTHLY_REQUEST_LIMIT=1000` to the git-ignored `.env` before starting the backend. This raises only that local process's allowance so benchmark usage does not block development. The checked-in application default and commercial policy remain `25`; quota enforcement and authentication remain enabled.
+
 The provider uses the OpenAI Responses API with `store: false` and strict JSON Schema `pettale_event_extraction_v1`. Prompt version `pettale-event-extraction-v1` prohibits diagnosis and invented facts, supports multiple events, and uses `recordedAt` as the temporal reference. Only provider/model/token counts/provider request ID are retained. Raw provider errors and content are neither logged nor returned.
 
 For the current V1 extraction contract, every `WEIGHT` category draft represents a pet body-weight observation and therefore must use canonical `eventType = BODY_WEIGHT`. The provider instruction and schema description express this semantic rule, and backend validation independently rejects `WEIGHT` drafts with any other event type. No broader event-type taxonomy is defined yet.

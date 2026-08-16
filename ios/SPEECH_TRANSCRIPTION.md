@@ -1,6 +1,8 @@
 # Pettale speech transcription
 
-Step 2B uses the iOS 26 `SpeechAnalyzer` and `SpeechTranscriber` APIs. The user explicitly selects English (`en-US`) or Korean (`ko-KR`) for each recording; the UI language is not used as the spoken-language signal.
+Step 2B uses the iOS 26 `SpeechAnalyzer` and `SpeechTranscriber` APIs. Xcode 26.6's installed iOS 26.5 SDK requires a concrete locale when constructing `SpeechTranscriber` and exposes no automatic spoken-language detection option. `SpeechAnalyzer` can host multiple modules, but the API does not choose a reliable winning language between parallel English/Korean transcribers. `NLLanguageRecognizer` classifies text rather than audio, so it cannot select the transcriber before transcription.
+
+Pettale therefore remembers an English (`en-US`) or Korean (`ko-KR`) transcription preference in UserDefaults. The app/device language supplies only the first-use default. The preference is captured when recording begins and remains fixed for that recording session; changing it from Audio Review applies to the next recording. This preference is not Pet data and is not stored in SwiftData, CloudKit, or the backend. Mixed-language speech remains an Apple recognizer limitation; extraction's selected/known-pet context continues to handle reasonable pet-name STT errors.
 
 Before analysis, Pettale checks `SpeechTranscriber.isAvailable`, resolves an Apple-supported equivalent locale, and uses `AssetInventory` to check and, when supported, download/install the required system-managed speech asset. Failures are presented as localized retryable states.
 

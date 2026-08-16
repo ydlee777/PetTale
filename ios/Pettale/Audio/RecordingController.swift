@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import SwiftData
 
 enum MicrophonePermissionState: Equatable {
     case notDetermined
@@ -59,7 +60,9 @@ final class RecordingController {
     private(set) var userMessage: String?
     private(set) var recordedAt = Date()
     private(set) var recordingTimeZoneIdentifier = TimeZone.current.identifier
+    private(set) var recordingTranscriptionLanguage: TranscriptionLanguage = .english
     private(set) var extractedEvents: [ExtractedEventDraft] = []
+    private(set) var editableEventDrafts: [EditableEventDraft] = []
     private(set) var extractionError: EventExtractionError?
     var transcriptDraft = ""
     var transcriptionLanguage: TranscriptionLanguage = .english
@@ -133,6 +136,7 @@ final class RecordingController {
             try audioService.startRecording(to: url)
             recordedAt = Date()
             recordingTimeZoneIdentifier = currentTimeZoneIdentifier()
+            recordingTranscriptionLanguage = transcriptionLanguage
             temporaryAudioURL = url
             duration = 0
             recordingStartedAt = Date()
@@ -195,7 +199,7 @@ final class RecordingController {
         do {
             let transcript = try await transcriptionService.transcribe(
                 audioURL: temporaryAudioURL,
-                locale: transcriptionLanguage.locale
+                locale: recordingTranscriptionLanguage.locale
             ) { [weak self] progress in
                 guard let self, self.transcriptionSessionID == sessionID else { return }
                 self.phase = progress == .preparing ? .preparingTranscription : .transcribing
@@ -243,28 +247,30 @@ final class RecordingController {
                 petID: petID,
                 petName: petName,
                 knownPetNames: knownPetNames,
-                spokenLanguage: transcriptionLanguage.locale.identifier,
+                spokenLanguage: recordingTranscriptionLanguage.locale.identifier,
                 timeZone: recordingTimeZoneIdentifier,
                 session: session
             )
             extractedEvents = result.events
+            editableEventDrafts = result.events.map(EditableEventDraft.init(extracted:))
             phase = .eventDraftReview
         } catch let error as EventExtractionError {
             extractionError = error
             phase = .extractionFailed
             userMessage = error == .quotaExceeded
-                ? String(localized: "Your monthly AI allowance has been used.")
-                : String(localized: "Event extraction failed. Please try again.")
+                ? WorkflowPresentation.quotaMessage()
+                : String(localized: "We couldn't organize this recording. Please try again shortly.")
         } catch {
             extractionError = .temporarilyUnavailable
             phase = .extractionFailed
-            userMessage = String(localized: "Event extraction failed. Please try again.")
+            userMessage = String(localized: "We couldn't organize this recording. Please try again shortly.")
         }
     }
 
     func returnToTranscriptReview() {
         guard phase == .eventDraftReview || phase == .extractionFailed || phase == .authenticationRequired else { return }
         extractedEvents = []
+        editableEventDrafts = []
         extractionError = nil
         userMessage = nil
         phase = .transcriptReview
@@ -295,6 +301,7 @@ final class RecordingController {
         transcriptionSessionID = UUID()
         transcriptDraft = ""
         extractedEvents = []
+        editableEventDrafts = []
         extractionError = nil
         durationTask?.cancel()
         durationTask = nil
@@ -334,6 +341,39 @@ final class RecordingController {
 
     func clearUserMessage() {
         userMessage = nil
+    }
+
+    func setPreferredTranscriptionLanguage(_ language: TranscriptionLanguage) {
+        transcriptionLanguage = language
+    }
+
+    func replaceDraft(_ draft: EditableEventDraft) {
+        guard let index = editableEventDrafts.firstIndex(where: { $0.id == draft.id }) else { return }
+        var normalized = draft
+        normalized.normalize()
+        editableEventDrafts[index] = normalized
+    }
+
+    func addDraft() -> EditableEventDraft {
+        let draft = EditableEventDraft(occurredAt: recordedAt)
+        editableEventDrafts.append(draft)
+        return draft
+    }
+
+    func removeDraft(id: UUID) {
+        editableEventDrafts.removeAll { $0.id == id }
+    }
+
+    func saveReviewedEvents(in context: ModelContext) throws {
+        guard phase == .eventDraftReview else { return }
+        _ = try EventDraftSaveService.save(
+            petID: petID,
+            approvedTranscript: transcriptDraft,
+            recordedAt: recordedAt,
+            drafts: editableEventDrafts,
+            in: context
+        )
+        cleanup()
     }
 
     static func formattedDuration(_ duration: TimeInterval) -> String {
