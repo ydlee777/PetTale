@@ -42,6 +42,11 @@
 		F00000000000000000000016 /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000006 /* AuthenticationView.swift */; };
 		F00000000000000000000017 /* AuthenticationControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000007 /* AuthenticationControllerTests.swift */; };
 		H00000000000000000000011 /* EventExtractionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = H00000000000000000000001 /* EventExtractionService.swift */; };
+		I00000000000000000000011 /* EditableEventDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = I00000000000000000000001 /* EditableEventDraft.swift */; };
+		I00000000000000000000012 /* EventDraftSaveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = I00000000000000000000002 /* EventDraftSaveService.swift */; };
+		I00000000000000000000013 /* EventDraftEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = I00000000000000000000003 /* EventDraftEditorView.swift */; };
+		I00000000000000000000014 /* EventDraftWorkflowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = I00000000000000000000004 /* EventDraftWorkflowTests.swift */; };
+		J00000000000000000000011 /* WorkflowPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = J00000000000000000000001 /* WorkflowPresentation.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -94,6 +99,11 @@
 		F00000000000000000000006 /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		F00000000000000000000007 /* AuthenticationControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationControllerTests.swift; sourceTree = "<group>"; };
 		H00000000000000000000001 /* EventExtractionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventExtractionService.swift; sourceTree = "<group>"; };
+		I00000000000000000000001 /* EditableEventDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableEventDraft.swift; sourceTree = "<group>"; };
+		I00000000000000000000002 /* EventDraftSaveService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDraftSaveService.swift; sourceTree = "<group>"; };
+		I00000000000000000000003 /* EventDraftEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDraftEditorView.swift; sourceTree = "<group>"; };
+		I00000000000000000000004 /* EventDraftWorkflowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDraftWorkflowTests.swift; sourceTree = "<group>"; };
+		J00000000000000000000001 /* WorkflowPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkflowPresentation.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -132,6 +142,7 @@
 				B00000000000000000000004 /* PetFormView.swift */,
 				B00000000000000000000005 /* PetProfileView.swift */,
 				C00000000000000000000003 /* RecordingFlowView.swift */,
+				I00000000000000000000003 /* EventDraftEditorView.swift */,
 				B00000000000000000000002 /* PetFormState.swift */,
 				B00000000000000000000003 /* ProfilePhotoProcessor.swift */,
 				C00000000000000000000006 /* Audio */,
@@ -155,6 +166,7 @@
 				C00000000000000000000005 /* RecordingControllerTests.swift */,
 				E00000000000000000000004 /* PetRecordPersistenceTests.swift */,
 				F00000000000000000000007 /* AuthenticationControllerTests.swift */,
+				I00000000000000000000004 /* EventDraftWorkflowTests.swift */,
 			);
 			path = PettaleTests;
 			sourceTree = "<group>";
@@ -176,6 +188,8 @@
 				A00000000000000000000008 /* PetValidationError.swift */,
 				E00000000000000000000001 /* EventCategory.swift */,
 				E00000000000000000000002 /* PetRecordValidationError.swift */,
+				I00000000000000000000001 /* EditableEventDraft.swift */,
+				J00000000000000000000001 /* WorkflowPresentation.swift */,
 			);
 			path = Domain;
 			sourceTree = "<group>";
@@ -188,6 +202,7 @@
 				G00000000000000000000001 /* PettaleSchemaV3.swift */,
 				A0000000000000000000000A /* PettaleMigrationPlan.swift */,
 				A0000000000000000000000B /* PettalePersistence.swift */,
+				I00000000000000000000002 /* EventDraftSaveService.swift */,
 			);
 			path = Persistence;
 			sourceTree = "<group>";
@@ -361,6 +376,10 @@
 				F00000000000000000000015 /* AuthenticationController.swift in Sources */,
 				F00000000000000000000016 /* AuthenticationView.swift in Sources */,
 				H00000000000000000000011 /* EventExtractionService.swift in Sources */,
+				I00000000000000000000011 /* EditableEventDraft.swift in Sources */,
+				I00000000000000000000012 /* EventDraftSaveService.swift in Sources */,
+				I00000000000000000000013 /* EventDraftEditorView.swift in Sources */,
+				J00000000000000000000011 /* WorkflowPresentation.swift in Sources */,
 				A00000000000000000000018 /* PettaleMigrationPlan.swift in Sources */,
 				A00000000000000000000019 /* PettalePersistence.swift in Sources */,
 			);
@@ -375,6 +394,7 @@
 				C00000000000000000000015 /* RecordingControllerTests.swift in Sources */,
 				E00000000000000000000014 /* PetRecordPersistenceTests.swift in Sources */,
 				F00000000000000000000017 /* AuthenticationControllerTests.swift in Sources */,
+				I00000000000000000000014 /* EventDraftWorkflowTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

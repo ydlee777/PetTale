@@ -21,7 +21,18 @@ enum EventExtractionError: Error, Equatable {
     case quotaExceeded
     case temporarilyUnavailable
     case invalidResponse
+
+    static func mapped(statusCode: Int, data: Data) -> EventExtractionError {
+        if statusCode == 429,
+           let response = try? JSONDecoder().decode(ExtractionErrorResponse.self, from: data),
+           response.code == "QUOTA_EXCEEDED" {
+            return .quotaExceeded
+        }
+        return .temporarilyUnavailable
+    }
 }
+
+private struct ExtractionErrorResponse: Decodable { let code: String }
 
 @MainActor
 protocol EventExtractionService {
@@ -71,7 +82,9 @@ struct BackendEventExtractionService: EventExtractionService {
         ))
         let (data, response) = try await urlSession.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw EventExtractionError.invalidResponse }
-        if http.statusCode == 429 { throw EventExtractionError.quotaExceeded }
+        if http.statusCode == 429 {
+            throw EventExtractionError.mapped(statusCode: http.statusCode, data: data)
+        }
         guard http.statusCode == 200 else { throw EventExtractionError.temporarilyUnavailable }
         do {
             let result = try JSONDecoder.pettaleExtraction.decode(EventExtractionResult.self, from: data)

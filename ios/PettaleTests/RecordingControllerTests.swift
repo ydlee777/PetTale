@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 import XCTest
 @testable import Pettale
 
@@ -194,6 +195,21 @@ final class RecordingControllerTests: XCTestCase {
         controller.cleanup()
     }
 
+    func testRecordingCapturesPreferredLanguageForItsSession() async {
+        let speech = FakeSpeechTranscriptionService()
+        let controller = makeController(service: FakeAudioRecordingService(), transcriptionService: speech)
+        controller.setPreferredTranscriptionLanguage(.korean)
+        await controller.beginRecording()
+        controller.setPreferredTranscriptionLanguage(.english)
+        controller.finishRecording()
+        await controller.beginTranscription()
+
+        XCTAssertEqual(controller.recordingTranscriptionLanguage, .korean)
+        XCTAssertEqual(speech.receivedLocale?.identifier, "ko-KR")
+        XCTAssertEqual(controller.transcriptionLanguage, .english)
+        controller.cleanup()
+    }
+
     func testEmptyTranscriptShowsNoSpeechFailure() async {
         let speech = FakeSpeechTranscriptionService()
         speech.result = .failure(SpeechTranscriptionError.emptyTranscript)
@@ -361,6 +377,52 @@ final class RecordingControllerTests: XCTestCase {
         XCTAssertTrue(controller.transcriptDraft.isEmpty)
     }
 
+    func testDraftAddEditRemoveDoesNotPersistBeforeSave() async throws {
+        let extraction = FakeEventExtractionService()
+        extraction.result = .success(.init(schemaVersion: "1", clientPetId: extraction.petID, events: [
+            .init(category: .weight, eventType: "BODY_WEIGHT", occurredAt: Date(), numericValue: 6.2, unit: "KG", count: nil, durationMinutes: nil, description: nil)
+        ]))
+        let controller = makeController(petID: extraction.petID, service: FakeAudioRecordingService(), extractionService: extraction)
+        await reachTranscriptReview(controller)
+        await controller.continueToExtraction(session: validSession(), knownPetNames: ["Oreo"])
+        let container = try PettalePersistence.makeModelContainer(inMemory: true, cloudKitEnabled: false)
+
+        var edited = try XCTUnwrap(controller.editableEventDrafts.first)
+        edited.numericValue = 6.4
+        controller.replaceDraft(edited)
+        let added = controller.addDraft()
+        controller.removeDraft(id: added.id)
+
+        XCTAssertEqual(controller.editableEventDrafts.first?.numericValue, 6.4)
+        XCTAssertEqual(controller.editableEventDrafts.count, 1)
+        XCTAssertTrue(try container.mainContext.fetch(FetchDescriptor<PetRecord>()).isEmpty)
+        XCTAssertTrue(try container.mainContext.fetch(FetchDescriptor<PetEvent>()).isEmpty)
+        controller.cleanup()
+    }
+
+    func testSuccessfulSaveClearsTemporarySessionState() async throws {
+        let extraction = FakeEventExtractionService()
+        extraction.result = .success(.init(schemaVersion: "1", clientPetId: extraction.petID, events: [
+            .init(category: .activity, eventType: "PLAY", occurredAt: Date(), numericValue: nil, unit: nil, count: nil, durationMinutes: 20, description: nil)
+        ]))
+        let controller = makeController(petID: extraction.petID, service: FakeAudioRecordingService(), extractionService: extraction)
+        await reachTranscriptReview(controller)
+        await controller.continueToExtraction(session: validSession(), knownPetNames: ["Oreo"])
+        let container = try PettalePersistence.makeModelContainer(inMemory: true, cloudKitEnabled: false)
+        container.mainContext.insert(try Pet(id: extraction.petID, name: "Oreo", species: .cat))
+        try container.mainContext.save()
+
+        try controller.saveReviewedEvents(in: container.mainContext)
+
+        XCTAssertEqual(controller.phase, .idle)
+        XCTAssertTrue(controller.transcriptDraft.isEmpty)
+        XCTAssertTrue(controller.extractedEvents.isEmpty)
+        XCTAssertTrue(controller.editableEventDrafts.isEmpty)
+        XCTAssertNil(controller.temporaryAudioURL)
+        XCTAssertEqual(try container.mainContext.fetch(FetchDescriptor<PetRecord>()).count, 1)
+        XCTAssertEqual(try container.mainContext.fetch(FetchDescriptor<PetEvent>()).count, 1)
+    }
+
     private func reachTranscriptReview(_ controller: RecordingController) async {
         await controller.beginRecording()
         controller.finishRecording()
@@ -421,6 +483,7 @@ private final class FakeSpeechTranscriptionService: SpeechTranscriptionService {
     var result: Result<String, Error> = .success("Oreo ate well.")
     var progressStates: [SpeechTranscriptionProgress] = [.preparing, .transcribing]
     var callCount = 0
+    var receivedLocale: Locale?
     private var continuations: [CheckedContinuation<String, Error>] = []
     var suspends = false
 
@@ -430,6 +493,7 @@ private final class FakeSpeechTranscriptionService: SpeechTranscriptionService {
         progress: @escaping (SpeechTranscriptionProgress) -> Void
     ) async throws -> String {
         callCount += 1
+        receivedLocale = locale
         progressStates.forEach(progress)
         if suspends {
             return try await withCheckedThrowingContinuation { continuations.append($0) }

@@ -28,4 +28,20 @@ enum EventCategory: String, CaseIterable, Codable, Sendable {
         case .other: String(localized: "Other")
         }
     }
+
+    var symbolName: String {
+        switch self {
+        case .food: "fork.knife"
+        case .weight: "scalemass"
+        case .health: "heart.text.clipboard"
+        case .medication: "pill"
+        case .activity: "figure.run"
+        case .behavior: "pawprint"
+        case .sleep: "moon.zzz"
+        case .grooming: "sparkles"
+        case .vet: "cross.case"
+        case .event: "calendar"
+        case .other: "square.grid.2x2"
+        }
+    }
 }
