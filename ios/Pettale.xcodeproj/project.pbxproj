@@ -52,6 +52,9 @@
 		L00000000000000000000012 /* DiaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = L00000000000000000000002 /* DiaryView.swift */; };
 		L00000000000000000000013 /* DiaryPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = L00000000000000000000003 /* DiaryPresentationTests.swift */; };
 		L00000000000000000000014 /* DiaryDevelopmentSeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = L00000000000000000000004 /* DiaryDevelopmentSeed.swift */; };
+		M00000000000000000000011 /* WeightTrendPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = M00000000000000000000001 /* WeightTrendPresentation.swift */; };
+		M00000000000000000000012 /* WeightTrendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M00000000000000000000002 /* WeightTrendView.swift */; };
+		M00000000000000000000013 /* WeightTrendPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M00000000000000000000003 /* WeightTrendPresentationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -114,6 +117,9 @@
 		L00000000000000000000002 /* DiaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryView.swift; sourceTree = "<group>"; };
 		L00000000000000000000003 /* DiaryPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryPresentationTests.swift; sourceTree = "<group>"; };
 		L00000000000000000000004 /* DiaryDevelopmentSeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryDevelopmentSeed.swift; sourceTree = "<group>"; };
+		M00000000000000000000001 /* WeightTrendPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightTrendPresentation.swift; sourceTree = "<group>"; };
+		M00000000000000000000002 /* WeightTrendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightTrendView.swift; sourceTree = "<group>"; };
+		M00000000000000000000003 /* WeightTrendPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightTrendPresentationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -151,6 +157,7 @@
 				A00000000000000000000002 /* HomeView.swift */,
 				L00000000000000000000002 /* DiaryView.swift */,
 				L00000000000000000000004 /* DiaryDevelopmentSeed.swift */,
+				M00000000000000000000002 /* WeightTrendView.swift */,
 				B00000000000000000000004 /* PetFormView.swift */,
 				B00000000000000000000005 /* PetProfileView.swift */,
 				C00000000000000000000003 /* RecordingFlowView.swift */,
@@ -180,6 +187,7 @@
 				F00000000000000000000007 /* AuthenticationControllerTests.swift */,
 				I00000000000000000000004 /* EventDraftWorkflowTests.swift */,
 				L00000000000000000000003 /* DiaryPresentationTests.swift */,
+				M00000000000000000000003 /* WeightTrendPresentationTests.swift */,
 			);
 			path = PettaleTests;
 			sourceTree = "<group>";
@@ -204,6 +212,7 @@
 				I00000000000000000000001 /* EditableEventDraft.swift */,
 				J00000000000000000000001 /* WorkflowPresentation.swift */,
 				L00000000000000000000001 /* DiaryPresentation.swift */,
+				M00000000000000000000001 /* WeightTrendPresentation.swift */,
 			);
 			path = Domain;
 			sourceTree = "<group>";
@@ -399,6 +408,8 @@
 				L00000000000000000000011 /* DiaryPresentation.swift in Sources */,
 				L00000000000000000000012 /* DiaryView.swift in Sources */,
 				L00000000000000000000014 /* DiaryDevelopmentSeed.swift in Sources */,
+				M00000000000000000000011 /* WeightTrendPresentation.swift in Sources */,
+				M00000000000000000000012 /* WeightTrendView.swift in Sources */,
 				A00000000000000000000018 /* PettaleMigrationPlan.swift in Sources */,
 				A00000000000000000000019 /* PettalePersistence.swift in Sources */,
 			);
@@ -415,6 +426,7 @@
 				F00000000000000000000017 /* AuthenticationControllerTests.swift in Sources */,
 				I00000000000000000000014 /* EventDraftWorkflowTests.swift in Sources */,
 				L00000000000000000000013 /* DiaryPresentationTests.swift in Sources */,
+				M00000000000000000000013 /* WeightTrendPresentationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

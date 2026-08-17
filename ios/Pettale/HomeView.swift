@@ -9,6 +9,9 @@ struct HomeView: View {
     @State private var authentication = AuthenticationController()
     @State private var isAccountPresented = false
     @State private var selectedTab: HomeTab = .today
+#if DEBUG
+    private let opensDevelopmentWeight: Bool
+#endif
 
     init(pets: [Pet]) {
         self.pets = pets
@@ -19,6 +22,8 @@ struct HomeView: View {
         let opensDiary = ProcessInfo.processInfo.environment["PETTALE_OPEN_DIARY"] == "1"
             || ProcessInfo.processInfo.arguments.contains("-pettaleDiary")
         _selectedTab = State(initialValue: opensDiary ? .diary : .today)
+        opensDevelopmentWeight = ProcessInfo.processInfo.environment["PETTALE_OPEN_WEIGHT"] == "1"
+            || ProcessInfo.processInfo.arguments.contains("-pettaleWeight")
 #endif
     }
 
@@ -30,19 +35,15 @@ struct HomeView: View {
         NavigationStack {
             Group {
                 if let selectedPet {
-                    TabView(selection: $selectedTab) {
-                        PetProfileView(
-                            pet: selectedPet,
-                            recordAction: { startRecording(for: selectedPet) },
-                            editAction: { presentedForm = .edit(selectedPet) }
-                        )
-                        .tabItem { Label("Today", systemImage: "house") }
-                        .tag(HomeTab.today)
-
-                        DiaryView(pet: selectedPet) { startRecording(for: selectedPet) }
-                            .tabItem { Label("Diary", systemImage: "book.closed") }
-                            .tag(HomeTab.diary)
+#if DEBUG
+                    if opensDevelopmentWeight {
+                        WeightTrendView(pet: selectedPet) { startRecording(for: selectedPet) }
+                    } else {
+                        homeTabs(for: selectedPet)
                     }
+#else
+                    homeTabs(for: selectedPet)
+#endif
                 }
             }
             .navigationTitle(selectedTab == .today ? "Pettale" : "Diary")
@@ -93,6 +94,22 @@ struct HomeView: View {
                 NavigationStack { AuthenticationView(controller: authentication) }
             }
         }
+    }
+
+    private func homeTabs(for selectedPet: Pet) -> some View {
+                    TabView(selection: $selectedTab) {
+                        PetProfileView(
+                            pet: selectedPet,
+                            recordAction: { startRecording(for: selectedPet) },
+                            editAction: { presentedForm = .edit(selectedPet) }
+                        )
+                        .tabItem { Label("Today", systemImage: "house") }
+                        .tag(HomeTab.today)
+
+                        DiaryView(pet: selectedPet) { startRecording(for: selectedPet) }
+                            .tabItem { Label("Diary", systemImage: "book.closed") }
+                            .tag(HomeTab.diary)
+                    }
     }
 
     private var selectedPetBinding: Binding<UUID> {

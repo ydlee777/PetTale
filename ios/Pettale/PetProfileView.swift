@@ -31,6 +31,23 @@ struct PetProfileView: View {
                 .buttonStyle(.borderedProminent)
                 .accessibilityLabel("Record today's tale")
 
+                NavigationLink {
+                    WeightTrendView(pet: pet, recordAction: recordAction)
+                } label: {
+                    HStack {
+                        Label("Weight", systemImage: "chart.xyaxis.line")
+                            .font(.headline)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption.bold())
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding()
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20))
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Shows weight history for \(pet.name)")
+
                 VStack(spacing: 0) {
                     if pet.sex != .unknown { profileRow("Sex", value: pet.sex.localizedName) }
                     if let birthDate = pet.birthDate { profileRow("Birthday", value: birthDate.formatted(date: .long, time: .omitted)) }
