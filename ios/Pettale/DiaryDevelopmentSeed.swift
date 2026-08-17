@@ -110,6 +110,10 @@ enum DiaryDevelopmentSeed {
         let oreoHealth = try PetRecord(pet: oreo, originalTranscript: "오레오가 한 번 토했어.", recordedAt: oreoHealthDate)
         context.insert(oreoHealth)
         context.insert(try PetEvent(record: oreoHealth, category: .health, eventType: "VOMITING", count: 1))
+        let oreoVetDate = calendar.date(byAdding: .day, value: -20, to: morning) ?? morning
+        let oreoVet = try PetRecord(pet: oreo, originalTranscript: "오레오 정기 검진을 다녀왔어.", recordedAt: oreoVetDate)
+        context.insert(oreoVet)
+        context.insert(try PetEvent(record: oreoVet, category: .vet, description: "정기 검진"))
         try context.save()
     }
 }
