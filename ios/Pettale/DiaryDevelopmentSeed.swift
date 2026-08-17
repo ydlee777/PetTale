@@ -19,9 +19,11 @@ enum DiaryDevelopmentSeed {
         let oreo = try Pet(name: "Oreo", species: .cat)
         let creamy = try Pet(name: "Creamy", species: .cat)
         let milo = try Pet(name: "Milo", species: .dog)
+        let coco = try Pet(name: "Coco", species: .dog)
         context.insert(oreo)
         context.insert(creamy)
         context.insert(milo)
+        context.insert(coco)
 
         let morningRecord = try PetRecord(
             pet: oreo,
@@ -36,6 +38,13 @@ enum DiaryDevelopmentSeed {
         }
         context.insert(try PetEvent(record: morningRecord, category: .activity, eventType: "PLAY"))
         context.insert(try PetEvent(record: morningRecord, category: .weight, eventType: "BODY_WEIGHT", numericValue: 6.2, unit: "KG"))
+
+        for (daysAgo, weight) in [(94, 6.4), (63, 6.3), (33, 6.25), (16, 6.2)] {
+            let measuredAt = calendar.date(byAdding: .day, value: -daysAgo, to: morning) ?? morning
+            let record = try PetRecord(pet: oreo, originalTranscript: "Development weight history", recordedAt: measuredAt)
+            context.insert(record)
+            context.insert(try PetEvent(record: record, category: .weight, eventType: "BODY_WEIGHT", numericValue: weight, unit: "KG"))
+        }
 
         let eveningRecord = try PetRecord(
             pet: oreo,
@@ -67,6 +76,16 @@ enum DiaryDevelopmentSeed {
             eventType: "EYE_REDNESS",
             description: "Left eye looked a little red and watery"
         ))
+        for (daysAgo, weight) in [(77, 5.1), (47, 5.2), (0, 5.2)] {
+            let measuredAt = calendar.date(byAdding: .day, value: -daysAgo, to: morning) ?? morning
+            let record = try PetRecord(pet: creamy, originalTranscript: "Development weight history", recordedAt: measuredAt)
+            context.insert(record)
+            context.insert(try PetEvent(record: record, category: .weight, eventType: "BODY_WEIGHT", numericValue: weight, unit: "KG"))
+        }
+
+        let miloRecord = try PetRecord(pet: milo, originalTranscript: "Development single weight", recordedAt: morning)
+        context.insert(miloRecord)
+        context.insert(try PetEvent(record: miloRecord, category: .weight, eventType: "BODY_WEIGHT", numericValue: 8.4, unit: "KG"))
         try context.save()
     }
 }

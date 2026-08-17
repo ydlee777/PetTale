@@ -1925,6 +1925,26 @@
         "ko" : { "stringUnit" : { "state" : "translated", "value" : "일기 상세 내용을 엽니다" } }
       }
     },
+    "1 Month" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "1개월" } } } },
+    "1 Year" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "1년" } } } },
+    "1M" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "1개월" } } } },
+    "1Y" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "1년" } } } },
+    "3 Months" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "3개월" } } } },
+    "3M" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "3개월" } } } },
+    "6 Months" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "6개월" } } } },
+    "6M" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "6개월" } } } },
+    "Add another weight record to see the trend." : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "체중을 한 번 더 기록하면 변화를 볼 수 있어요." } } } },
+    "All" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "전체" } } } },
+    "Change" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "변화" } } } },
+    "Choose a longer period to see earlier records." : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "더 긴 기간을 선택하면 이전 기록을 볼 수 있어요." } } } },
+    "Current Weight" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "현재 체중" } } } },
+    "No weight history yet" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "아직 체중 기록이 없어요" } } } },
+    "No weight records in this period" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "이 기간에는 체중 기록이 없어요" } } } },
+    "One weight record" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "체중 기록 1개" } } } },
+    "Period" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "기간" } } } },
+    "Tell Pettale your pet's weight when you record today's story." : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "오늘 이야기를 녹음하면서 체중도 함께 말해 주세요." } } } },
+    "Weight history chart" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "체중 기록 차트" } } } },
+    "Weight history period" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "체중 기록 기간" } } } },
     "Today" : {
       "localizations" : {
         "ko" : { "stringUnit" : { "state" : "translated", "value" : "오늘" } }
