@@ -48,6 +48,10 @@
 		I00000000000000000000013 /* EventDraftEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = I00000000000000000000003 /* EventDraftEditorView.swift */; };
 		I00000000000000000000014 /* EventDraftWorkflowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = I00000000000000000000004 /* EventDraftWorkflowTests.swift */; };
 		J00000000000000000000011 /* WorkflowPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = J00000000000000000000001 /* WorkflowPresentation.swift */; };
+		L00000000000000000000011 /* DiaryPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = L00000000000000000000001 /* DiaryPresentation.swift */; };
+		L00000000000000000000012 /* DiaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = L00000000000000000000002 /* DiaryView.swift */; };
+		L00000000000000000000013 /* DiaryPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = L00000000000000000000003 /* DiaryPresentationTests.swift */; };
+		L00000000000000000000014 /* DiaryDevelopmentSeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = L00000000000000000000004 /* DiaryDevelopmentSeed.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -106,6 +110,10 @@
 		I00000000000000000000003 /* EventDraftEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDraftEditorView.swift; sourceTree = "<group>"; };
 		I00000000000000000000004 /* EventDraftWorkflowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDraftWorkflowTests.swift; sourceTree = "<group>"; };
 		J00000000000000000000001 /* WorkflowPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkflowPresentation.swift; sourceTree = "<group>"; };
+		L00000000000000000000001 /* DiaryPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryPresentation.swift; sourceTree = "<group>"; };
+		L00000000000000000000002 /* DiaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryView.swift; sourceTree = "<group>"; };
+		L00000000000000000000003 /* DiaryPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryPresentationTests.swift; sourceTree = "<group>"; };
+		L00000000000000000000004 /* DiaryDevelopmentSeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryDevelopmentSeed.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,6 +149,8 @@
 				A00000000000000000000001 /* PettaleApp.swift */,
 				B00000000000000000000001 /* RootView.swift */,
 				A00000000000000000000002 /* HomeView.swift */,
+				L00000000000000000000002 /* DiaryView.swift */,
+				L00000000000000000000004 /* DiaryDevelopmentSeed.swift */,
 				B00000000000000000000004 /* PetFormView.swift */,
 				B00000000000000000000005 /* PetProfileView.swift */,
 				C00000000000000000000003 /* RecordingFlowView.swift */,
@@ -169,6 +179,7 @@
 				E00000000000000000000004 /* PetRecordPersistenceTests.swift */,
 				F00000000000000000000007 /* AuthenticationControllerTests.swift */,
 				I00000000000000000000004 /* EventDraftWorkflowTests.swift */,
+				L00000000000000000000003 /* DiaryPresentationTests.swift */,
 			);
 			path = PettaleTests;
 			sourceTree = "<group>";
@@ -192,6 +203,7 @@
 				E00000000000000000000002 /* PetRecordValidationError.swift */,
 				I00000000000000000000001 /* EditableEventDraft.swift */,
 				J00000000000000000000001 /* WorkflowPresentation.swift */,
+				L00000000000000000000001 /* DiaryPresentation.swift */,
 			);
 			path = Domain;
 			sourceTree = "<group>";
@@ -384,6 +396,9 @@
 				I00000000000000000000012 /* EventDraftSaveService.swift in Sources */,
 				I00000000000000000000013 /* EventDraftEditorView.swift in Sources */,
 				J00000000000000000000011 /* WorkflowPresentation.swift in Sources */,
+				L00000000000000000000011 /* DiaryPresentation.swift in Sources */,
+				L00000000000000000000012 /* DiaryView.swift in Sources */,
+				L00000000000000000000014 /* DiaryDevelopmentSeed.swift in Sources */,
 				A00000000000000000000018 /* PettaleMigrationPlan.swift in Sources */,
 				A00000000000000000000019 /* PettalePersistence.swift in Sources */,
 			);
@@ -399,6 +414,7 @@
 				E00000000000000000000014 /* PetRecordPersistenceTests.swift in Sources */,
 				F00000000000000000000017 /* AuthenticationControllerTests.swift in Sources */,
 				I00000000000000000000014 /* EventDraftWorkflowTests.swift in Sources */,
+				L00000000000000000000013 /* DiaryPresentationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -451,6 +467,7 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
