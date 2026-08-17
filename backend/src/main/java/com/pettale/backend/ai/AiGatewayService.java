@@ -50,7 +50,7 @@ public class AiGatewayService {
         }
     }
 
-    static UUID authenticatedUserId(Authentication authentication) {
+    public static UUID authenticatedUserId(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new IllegalArgumentException("Authenticated Pettale session is required");
         }

@@ -21,7 +21,8 @@ pettale:
     lifetime: ${PETTALE_SESSION_LIFETIME:P30D}
     signing-key: ${PETTALE_SESSION_SIGNING_KEY:}
   ai:
-    monthly-request-limit: ${PETTALE_AI_MONTHLY_REQUEST_LIMIT:25}
+    free-monthly-request-limit: ${PETTALE_AI_FREE_MONTHLY_REQUEST_LIMIT:3}
+    premium-monthly-request-limit: ${PETTALE_AI_PREMIUM_MONTHLY_REQUEST_LIMIT:100}
     extraction-model: ${PETTALE_EXTRACTION_MODEL:gpt-5-mini}
     reasoning-effort: ${PETTALE_EXTRACTION_REASONING_EFFORT:low}
     text-verbosity: ${PETTALE_EXTRACTION_TEXT_VERBOSITY:low}
@@ -29,6 +30,8 @@ pettale:
     provider-timeout: ${PETTALE_OPENAI_TIMEOUT:PT30S}
     openai-api-key: ${PETTALE_OPENAI_API_KEY:}
     openai-base-url: ${PETTALE_OPENAI_BASE_URL:https://api.openai.com}
+  trial:
+    duration: ${PETTALE_TRIAL_DURATION:P30D}
 management:
   endpoints:
     web:
