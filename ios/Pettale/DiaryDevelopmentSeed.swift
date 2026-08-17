@@ -74,8 +74,27 @@ enum DiaryDevelopmentSeed {
             record: creamyRecord,
             category: .health,
             eventType: "EYE_REDNESS",
-            description: "Left eye looked a little red and watery"
+            description: "왼쪽 눈이 조금 빨갛고 눈물이 났음"
         ))
+        let creamyVomitingDate = calendar.date(byAdding: .day, value: -13, to: morning) ?? morning
+        let creamyVomiting = try PetRecord(
+            pet: creamy,
+            originalTranscript: "크리미가 한 번 토했어.",
+            diaryText: "크리미가 한 번 토했어요.",
+            recordedAt: creamyVomitingDate
+        )
+        context.insert(creamyVomiting)
+        context.insert(try PetEvent(record: creamyVomiting, category: .health, eventType: "VOMITING", count: 1))
+
+        let medicationDate = calendar.date(byAdding: .day, value: -26, to: morning) ?? morning
+        let medication = try PetRecord(pet: creamy, originalTranscript: "크리미에게 안약을 넣어 줬어.", recordedAt: medicationDate)
+        context.insert(medication)
+        context.insert(try PetEvent(record: medication, category: .medication, description: "안약 투여"))
+
+        let vetDate = calendar.date(byAdding: .day, value: -35, to: morning) ?? morning
+        let vet = try PetRecord(pet: creamy, originalTranscript: "크리미 정기 검진을 다녀왔어.", recordedAt: vetDate)
+        context.insert(vet)
+        context.insert(try PetEvent(record: vet, category: .vet, description: "정기 검진"))
         for (daysAgo, weight) in [(77, 5.1), (47, 5.2), (0, 5.2)] {
             let measuredAt = calendar.date(byAdding: .day, value: -daysAgo, to: morning) ?? morning
             let record = try PetRecord(pet: creamy, originalTranscript: "Development weight history", recordedAt: measuredAt)
@@ -86,6 +105,11 @@ enum DiaryDevelopmentSeed {
         let miloRecord = try PetRecord(pet: milo, originalTranscript: "Development single weight", recordedAt: morning)
         context.insert(miloRecord)
         context.insert(try PetEvent(record: miloRecord, category: .weight, eventType: "BODY_WEIGHT", numericValue: 8.4, unit: "KG"))
+
+        let oreoHealthDate = calendar.date(byAdding: .day, value: -12, to: morning) ?? morning
+        let oreoHealth = try PetRecord(pet: oreo, originalTranscript: "오레오가 한 번 토했어.", recordedAt: oreoHealthDate)
+        context.insert(oreoHealth)
+        context.insert(try PetEvent(record: oreoHealth, category: .health, eventType: "VOMITING", count: 1))
         try context.save()
     }
 }

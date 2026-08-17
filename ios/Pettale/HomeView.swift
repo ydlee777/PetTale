@@ -11,6 +11,7 @@ struct HomeView: View {
     @State private var selectedTab: HomeTab = .today
 #if DEBUG
     private let opensDevelopmentWeight: Bool
+    private let opensDevelopmentHealth: Bool
 #endif
 
     init(pets: [Pet]) {
@@ -24,6 +25,8 @@ struct HomeView: View {
         _selectedTab = State(initialValue: opensDiary ? .diary : .today)
         opensDevelopmentWeight = ProcessInfo.processInfo.environment["PETTALE_OPEN_WEIGHT"] == "1"
             || ProcessInfo.processInfo.arguments.contains("-pettaleWeight")
+        opensDevelopmentHealth = ProcessInfo.processInfo.environment["PETTALE_OPEN_HEALTH"] == "1"
+            || ProcessInfo.processInfo.arguments.contains("-pettaleHealth")
 #endif
     }
 
@@ -36,7 +39,9 @@ struct HomeView: View {
             Group {
                 if let selectedPet {
 #if DEBUG
-                    if opensDevelopmentWeight {
+                    if opensDevelopmentHealth {
+                        HealthHistoryView(pet: selectedPet) { startRecording(for: selectedPet) }
+                    } else if opensDevelopmentWeight {
                         WeightTrendView(pet: selectedPet) { startRecording(for: selectedPet) }
                     } else {
                         homeTabs(for: selectedPet)
