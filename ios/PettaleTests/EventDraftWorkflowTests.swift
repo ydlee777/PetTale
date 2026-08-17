@@ -37,7 +37,7 @@ final class EventDraftWorkflowTests: XCTestCase {
         XCTAssertEqual(TranscriptionLanguagePreference.load(defaults: defaults, preferredLanguages: ["en-US"]), .korean)
 
         let container = try makeContainer()
-        XCTAssertEqual(PettaleSchemaV3.versionIdentifier, Schema.Version(3, 0, 0))
+        XCTAssertEqual(PettaleSchemaV4.versionIdentifier, Schema.Version(4, 0, 0))
         XCTAssertTrue(try container.mainContext.fetch(FetchDescriptor<PetRecord>()).isEmpty)
     }
 
@@ -126,6 +126,7 @@ final class EventDraftWorkflowTests: XCTestCase {
         let graph = try EventDraftSaveService.save(
             petID: oreo.id,
             approvedTranscript: "  Approved transcript  ",
+            approvedDiaryText: "A faithful diary.",
             recordedAt: recordedAt,
             drafts: drafts,
             in: context,
@@ -137,6 +138,7 @@ final class EventDraftWorkflowTests: XCTestCase {
         XCTAssertEqual(record.id, graph.recordID)
         XCTAssertEqual(Set(events.map(\.id)), Set(graph.eventIDs))
         XCTAssertEqual(record.originalTranscript, "Approved transcript")
+        XCTAssertEqual(record.diaryText, "A faithful diary.")
         XCTAssertEqual(record.recordedAt, recordedAt)
         XCTAssertEqual(record.pet?.id, oreo.id)
         XCTAssertEqual(oreo.records?.count, 1)
@@ -158,12 +160,14 @@ final class EventDraftWorkflowTests: XCTestCase {
         _ = try EventDraftSaveService.save(
             petID: pet.id,
             approvedTranscript: "A diary note with no structured events.",
+            approvedDiaryText: "A faithful diary.",
             recordedAt: .now,
             drafts: [],
             in: container.mainContext
         )
 
         XCTAssertEqual(try container.mainContext.fetch(FetchDescriptor<PetRecord>()).count, 1)
+        XCTAssertEqual(try container.mainContext.fetch(FetchDescriptor<PetRecord>()).first?.diaryText, "A faithful diary.")
         XCTAssertTrue(try container.mainContext.fetch(FetchDescriptor<PetEvent>()).isEmpty)
     }
 
@@ -178,6 +182,7 @@ final class EventDraftWorkflowTests: XCTestCase {
         XCTAssertThrowsError(try EventDraftSaveService.save(
             petID: pet.id,
             approvedTranscript: "Oreo had an observation.",
+            approvedDiaryText: "A faithful diary.",
             recordedAt: .now,
             drafts: [invalid],
             in: context
@@ -189,6 +194,7 @@ final class EventDraftWorkflowTests: XCTestCase {
         XCTAssertNoThrow(try EventDraftSaveService.save(
             petID: pet.id,
             approvedTranscript: "Oreo had an observation.",
+            approvedDiaryText: "A faithful diary.",
             recordedAt: .now,
             drafts: [corrected],
             in: context
@@ -198,10 +204,13 @@ final class EventDraftWorkflowTests: XCTestCase {
     func testMissingPetAndEmptyTranscriptPersistNothing() throws {
         let container = try makeContainer()
         XCTAssertThrowsError(try EventDraftSaveService.save(
-            petID: UUID(), approvedTranscript: "Note", recordedAt: .now, drafts: [], in: container.mainContext
+            petID: UUID(), approvedTranscript: "Note", approvedDiaryText: "A faithful diary.", recordedAt: .now, drafts: [], in: container.mainContext
         ))
         XCTAssertThrowsError(try EventDraftSaveService.save(
-            petID: UUID(), approvedTranscript: "  ", recordedAt: .now, drafts: [], in: container.mainContext
+            petID: UUID(), approvedTranscript: "  ", approvedDiaryText: "A faithful diary.", recordedAt: .now, drafts: [], in: container.mainContext
+        ))
+        XCTAssertThrowsError(try EventDraftSaveService.save(
+            petID: UUID(), approvedTranscript: "Note", approvedDiaryText: "  ", recordedAt: .now, drafts: [], in: container.mainContext
         ))
         XCTAssertTrue(try container.mainContext.fetch(FetchDescriptor<PetRecord>()).isEmpty)
     }
@@ -222,6 +231,7 @@ final class EventDraftWorkflowTests: XCTestCase {
             _ = try EventDraftSaveService.save(
                 petID: pet.id,
                 approvedTranscript: "Oreo played.",
+                approvedDiaryText: "A faithful diary.",
                 recordedAt: .now,
                 drafts: [.init(category: .activity, eventType: "PLAY", occurredAt: .now, durationMinutes: 20)],
                 in: container.mainContext

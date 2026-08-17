@@ -14,6 +14,7 @@ struct ExtractedEventDraft: Codable, Equatable, Sendable {
 struct EventExtractionResult: Decodable, Equatable, Sendable {
     let schemaVersion: String
     let clientPetId: UUID
+    var diaryText: String
     var events: [ExtractedEventDraft]
 }
 
@@ -88,7 +89,9 @@ struct BackendEventExtractionService: EventExtractionService {
         guard http.statusCode == 200 else { throw EventExtractionError.temporarilyUnavailable }
         do {
             let result = try JSONDecoder.pettaleExtraction.decode(EventExtractionResult.self, from: data)
-            guard result.schemaVersion == "1", result.clientPetId == petID, !result.events.isEmpty else {
+            guard result.schemaVersion == "2", result.clientPetId == petID,
+                  !result.diaryText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                  result.diaryText.count <= 4_000, !result.events.isEmpty else {
                 throw EventExtractionError.invalidResponse
             }
             return result

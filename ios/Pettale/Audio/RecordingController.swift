@@ -65,6 +65,7 @@ final class RecordingController {
     private(set) var editableEventDrafts: [EditableEventDraft] = []
     private(set) var extractionError: EventExtractionError?
     var transcriptDraft = ""
+    var diaryDraft = ""
     var transcriptionLanguage: TranscriptionLanguage = .english
 
     private let audioService: AudioRecordingService
@@ -252,6 +253,7 @@ final class RecordingController {
                 session: session
             )
             extractedEvents = result.events
+            diaryDraft = result.diaryText
             editableEventDrafts = result.events.map(EditableEventDraft.init(extracted:))
             phase = .eventDraftReview
         } catch let error as EventExtractionError {
@@ -270,6 +272,7 @@ final class RecordingController {
     func returnToTranscriptReview() {
         guard phase == .eventDraftReview || phase == .extractionFailed || phase == .authenticationRequired else { return }
         extractedEvents = []
+        diaryDraft = ""
         editableEventDrafts = []
         extractionError = nil
         userMessage = nil
@@ -300,6 +303,7 @@ final class RecordingController {
     func cleanup() {
         transcriptionSessionID = UUID()
         transcriptDraft = ""
+        diaryDraft = ""
         extractedEvents = []
         editableEventDrafts = []
         extractionError = nil
@@ -369,6 +373,7 @@ final class RecordingController {
         _ = try EventDraftSaveService.save(
             petID: petID,
             approvedTranscript: transcriptDraft,
+            approvedDiaryText: diaryDraft,
             recordedAt: recordedAt,
             drafts: editableEventDrafts,
             in: context

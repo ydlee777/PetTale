@@ -4,7 +4,7 @@ Pettale's backend owns the AI provider boundary. The iOS app must authenticate w
 
 ## Boundary and lifecycle
 
-`POST /api/v1/ai/extractions` is the authenticated product boundary. It reserves usage, invokes the server-only OpenAI adapter once, validates the strict structured result, records safe provider metadata, and returns transient event drafts. The endpoint never persists a transcript, pet context, or extracted event.
+`POST /api/v1/ai/extractions` is the authenticated product boundary. It reserves usage, invokes the server-only OpenAI adapter exactly once, validates the strict structured result, records safe provider metadata, and returns transient diary text plus event drafts. The endpoint never persists a transcript, diary text, pet context, or extracted event.
 
 The transient request requires the recording session's IANA `timeZone`. The backend validates it with Java `ZoneId` before usage reservation or provider invocation. OpenAI receives both the absolute `recordedAt` instant and validated zone, interprets local expressions only in that zone, and returns absolute UTC `occurredAt` values. Language is never used to infer time zone, and the zone is not persisted.
 
@@ -32,7 +32,7 @@ Before counting, reservations older than `PETTALE_AI_RESERVATION_TIMEOUT` (defau
 
 For local physical-device and Simulator QA, add `PETTALE_AI_MONTHLY_REQUEST_LIMIT=1000` to the git-ignored `.env` before starting the backend. This raises only that local process's allowance so benchmark usage does not block development. The checked-in application default and commercial policy remain `25`; quota enforcement and authentication remain enabled.
 
-The provider uses the OpenAI Responses API with `store: false` and strict JSON Schema `pettale_event_extraction_v1`. Prompt version `pettale-event-extraction-v1` prohibits diagnosis and invented facts, supports multiple events, and uses `recordedAt` as the temporal reference. Only provider/model/token counts/provider request ID are retained. Raw provider errors and content are neither logged nor returned.
+The provider uses the OpenAI Responses API with `store: false` and strict JSON Schema `pettale_event_extraction_v2`. Prompt version `pettale-event-extraction-v2` returns diary text and events together, prohibits translation, diagnosis, invented facts, and material omission, supports multiple events, and uses `recordedAt` as the temporal reference. A successful response requires nonblank `diaryText` with a 4,000 UTF-16-code-unit maximum; backend validation independently enforces this. Only provider/model/token counts/provider request ID are retained. Diary text, raw provider errors, and content are neither persisted nor logged.
 
 For the current V1 extraction contract, every `WEIGHT` category draft represents a pet body-weight observation and therefore must use canonical `eventType = BODY_WEIGHT`. The provider instruction and schema description express this semantic rule, and backend validation independently rejects `WEIGHT` drafts with any other event type. No broader event-type taxonomy is defined yet.
 

@@ -36,10 +36,11 @@ public class AiGatewayService {
 
         try {
             var result = provider.extractEvents(request.toProviderInput());
-            var events = validator.validate(result.schemaVersion(), result.events());
+            var extraction = validator.validate(result.schemaVersion(), result.diaryText(), result.events());
             usages.succeed(usage.getId(), new AiProviderMetadata(
                     result.provider(), result.model(), result.inputTokens(), result.outputTokens(), result.providerRequestId()));
-            return new ExtractionResponse(result.schemaVersion(), request.selectedPet().clientPetId(), events);
+            return new ExtractionResponse(result.schemaVersion(), request.selectedPet().clientPetId(),
+                    extraction.diaryText(), extraction.events());
         } catch (ProviderFailure error) {
             usages.fail(usage.getId(), failureCategory(error.kind()));
             throw new ExtractionFailure(apiCode(error.kind()));

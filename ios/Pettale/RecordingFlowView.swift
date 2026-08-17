@@ -273,9 +273,21 @@ struct RecordingFlowView: View {
     private var eventDraftReviewContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                Text("Review Events")
+                Text("Today's Tale")
                     .font(.title2.bold())
+                TextEditor(text: $controller.diaryDraft)
+                    .frame(minHeight: 140, maxHeight: 260)
+                    .scrollContentBackground(.hidden)
+                    .padding(12)
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.secondary.opacity(0.2)))
+                    .accessibilityLabel("Edit Today's Tale")
+                    .accessibilityHint("Review and edit the diary text before saving")
+                Text("Edit the story so it says exactly what you want to remember.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
                 Text("I found \(controller.editableEventDrafts.count) events")
+                    .font(.headline)
                     .foregroundStyle(.secondary)
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Transcript").font(.headline)
@@ -294,9 +306,12 @@ struct RecordingFlowView: View {
                             .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 6) {
                             Text(event.category.localizedName).font(.headline)
-                            if !event.eventType.isEmpty { Text(event.localizedEventType) }
+                            if !event.eventType.isEmpty,
+                               !(event.category == .weight && event.eventType == "BODY_WEIGHT") {
+                                Text(event.localizedEventType)
+                            }
                         if let value = event.numericValue {
-                            Text("\(value.formatted()) \(event.unit)")
+                            Text("\(value.formatted()) \(event.unit.lowercased())")
                         }
                         if let count = event.count { Text("Count: \(count)") }
                         if let minutes = event.durationMinutes { Text("\(minutes) min") }
@@ -322,7 +337,7 @@ struct RecordingFlowView: View {
                     Spacer()
                     Button("Save") { saveReviewedEvents() }
                         .buttonStyle(.borderedProminent)
-                        .accessibilityHint("Saves this transcript and reviewed events to private pet history")
+                        .accessibilityHint("Saves this transcript, diary, and reviewed events to private pet history")
                 }
                 Text("These are temporary drafts and have not been saved.")
                     .font(.footnote).foregroundStyle(.secondary)

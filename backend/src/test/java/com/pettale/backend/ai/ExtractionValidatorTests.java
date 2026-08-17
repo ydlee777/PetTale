@@ -14,7 +14,7 @@ class ExtractionValidatorTests {
     @Test void acceptsCanonicalBodyWeightEvent() {
         var event = weight("BODY_WEIGHT");
 
-        assertThat(validator.validate("1", List.of(event))).containsExactly(event);
+        assertThat(validator.validate("2", "오늘 오레오의 체중은 6.2kg이에요.", List.of(event)).events()).containsExactly(event);
     }
 
     @Test void rejectsCategoryNameAsWeightEventType() {
@@ -28,7 +28,7 @@ class ExtractionValidatorTests {
     @Test void acceptsCanonicalVomitingEvent() {
         var event = health("VOMITING");
 
-        assertThat(validator.validate("1", List.of(event))).containsExactly(event);
+        assertThat(validator.validate("2", "오늘 오레오가 한 번 토했어요.", List.of(event)).events()).containsExactly(event);
     }
 
     @Test void rejectsPastTenseVomitedAlias() {
@@ -40,10 +40,24 @@ class ExtractionValidatorTests {
     }
 
     private void assertRejected(ExtractedEventDraft event) {
-        assertThatThrownBy(() -> validator.validate("1", List.of(event)))
+        assertThatThrownBy(() -> validator.validate("2", "Valid diary", List.of(event)))
                 .isInstanceOf(ProviderFailure.class)
                 .satisfies(error -> assertThat(((ProviderFailure) error).kind())
                         .isEqualTo(ProviderFailure.Kind.INVALID_STRUCTURED_OUTPUT));
+    }
+
+    @Test void acceptsKoreanAndEnglishDiaryText() {
+        assertThat(validator.validate("2", "오늘 오레오의 체중은 6.2kg이에요.", List.of(weight("BODY_WEIGHT"))).diaryText())
+                .contains("오레오");
+        assertThat(validator.validate("2", "Oreo weighs 6.2 kg today.", List.of(weight("BODY_WEIGHT"))).diaryText())
+                .isEqualTo("Oreo weighs 6.2 kg today.");
+    }
+
+    @Test void rejectsBlankAndOversizedDiaryText() {
+        assertThatThrownBy(() -> validator.validate("2", "  ", List.of(weight("BODY_WEIGHT"))))
+                .isInstanceOf(ProviderFailure.class);
+        assertThatThrownBy(() -> validator.validate("2", "a".repeat(ExtractionValidator.MAX_DIARY_TEXT + 1),
+                List.of(weight("BODY_WEIGHT")))).isInstanceOf(ProviderFailure.class);
     }
 
     private ExtractedEventDraft weight(String eventType) {

@@ -299,8 +299,9 @@ final class RecordingControllerTests: XCTestCase {
     func testValidSessionStartsExtractionAndMapsMultipleDrafts() async {
         let extraction = FakeEventExtractionService()
         extraction.result = .success(.init(
-            schemaVersion: "1",
+            schemaVersion: "2",
             clientPetId: extraction.petID,
+            diaryText: "A faithful diary.",
             events: [
                 .init(category: .weight, eventType: "BODY_WEIGHT", occurredAt: Date(), numericValue: 6.2, unit: "KG", count: nil, durationMinutes: nil, description: nil),
                 .init(category: .activity, eventType: "PLAY", occurredAt: Date(), numericValue: nil, unit: nil, count: nil, durationMinutes: 20, description: nil)
@@ -311,10 +312,30 @@ final class RecordingControllerTests: XCTestCase {
         await controller.continueToExtraction(session: validSession(), knownPetNames: ["Oreo", "Creamy"])
         XCTAssertEqual(controller.phase, .eventDraftReview)
         XCTAssertEqual(controller.extractedEvents.count, 2)
+        XCTAssertEqual(controller.diaryDraft, "A faithful diary.")
         XCTAssertEqual(extraction.callCount, 1)
         XCTAssertEqual(extraction.receivedTranscript, "Oreo ate well.")
         XCTAssertEqual(extraction.receivedPetNames, ["Oreo", "Creamy"])
         XCTAssertEqual(extraction.receivedTimeZone, "Asia/Seoul")
+        controller.cleanup()
+    }
+
+    func testDiaryDraftEditingDoesNotModifyApprovedTranscriptOrEventDrafts() async {
+        let extraction = FakeEventExtractionService()
+        extraction.result = .success(.init(schemaVersion: "2", clientPetId: extraction.petID, diaryText: "Original diary.", events: [
+            .init(category: .activity, eventType: "PLAY", occurredAt: Date(), numericValue: nil, unit: nil, count: nil, durationMinutes: 20, description: nil)
+        ]))
+        let controller = makeController(petID: extraction.petID, service: FakeAudioRecordingService(), extractionService: extraction)
+        await reachTranscriptReview(controller)
+        let transcript = controller.transcriptDraft
+        await controller.continueToExtraction(session: validSession(), knownPetNames: ["Oreo"])
+
+        controller.diaryDraft = "User-approved diary."
+
+        XCTAssertEqual(controller.transcriptDraft, transcript)
+        XCTAssertEqual(controller.diaryDraft, "User-approved diary.")
+        XCTAssertEqual(controller.editableEventDrafts.first?.durationMinutes, 20)
+        XCTAssertEqual(extraction.callCount, 1)
         controller.cleanup()
     }
 
@@ -336,7 +357,7 @@ final class RecordingControllerTests: XCTestCase {
 
     func testTranscriptSurvivesAuthenticationThenContinues() async {
         let extraction = FakeEventExtractionService()
-        extraction.result = .success(.init(schemaVersion: "1", clientPetId: extraction.petID, events: [
+        extraction.result = .success(.init(schemaVersion: "2", clientPetId: extraction.petID, diaryText: "A faithful diary.", events: [
             .init(category: .food, eventType: "ATE_WELL", occurredAt: Date(), numericValue: nil, unit: nil, count: nil, durationMinutes: nil, description: nil)
         ]))
         let controller = makeController(petID: extraction.petID, service: FakeAudioRecordingService(), extractionService: extraction)
@@ -365,7 +386,7 @@ final class RecordingControllerTests: XCTestCase {
 
     func testDiscardClearsTransientExtractionWithoutPersistence() async {
         let extraction = FakeEventExtractionService()
-        extraction.result = .success(.init(schemaVersion: "1", clientPetId: extraction.petID, events: [
+        extraction.result = .success(.init(schemaVersion: "2", clientPetId: extraction.petID, diaryText: "A faithful diary.", events: [
             .init(category: .health, eventType: "VOMITING", occurredAt: Date(), numericValue: nil, unit: nil, count: 1, durationMinutes: nil, description: nil)
         ]))
         let controller = makeController(petID: extraction.petID, service: FakeAudioRecordingService(), extractionService: extraction)
@@ -375,11 +396,12 @@ final class RecordingControllerTests: XCTestCase {
         XCTAssertEqual(controller.phase, .idle)
         XCTAssertTrue(controller.extractedEvents.isEmpty)
         XCTAssertTrue(controller.transcriptDraft.isEmpty)
+        XCTAssertTrue(controller.diaryDraft.isEmpty)
     }
 
     func testDraftAddEditRemoveDoesNotPersistBeforeSave() async throws {
         let extraction = FakeEventExtractionService()
-        extraction.result = .success(.init(schemaVersion: "1", clientPetId: extraction.petID, events: [
+        extraction.result = .success(.init(schemaVersion: "2", clientPetId: extraction.petID, diaryText: "A faithful diary.", events: [
             .init(category: .weight, eventType: "BODY_WEIGHT", occurredAt: Date(), numericValue: 6.2, unit: "KG", count: nil, durationMinutes: nil, description: nil)
         ]))
         let controller = makeController(petID: extraction.petID, service: FakeAudioRecordingService(), extractionService: extraction)
@@ -402,7 +424,7 @@ final class RecordingControllerTests: XCTestCase {
 
     func testSuccessfulSaveClearsTemporarySessionState() async throws {
         let extraction = FakeEventExtractionService()
-        extraction.result = .success(.init(schemaVersion: "1", clientPetId: extraction.petID, events: [
+        extraction.result = .success(.init(schemaVersion: "2", clientPetId: extraction.petID, diaryText: "A faithful diary.", events: [
             .init(category: .activity, eventType: "PLAY", occurredAt: Date(), numericValue: nil, unit: nil, count: nil, durationMinutes: 20, description: nil)
         ]))
         let controller = makeController(petID: extraction.petID, service: FakeAudioRecordingService(), extractionService: extraction)
@@ -416,10 +438,12 @@ final class RecordingControllerTests: XCTestCase {
 
         XCTAssertEqual(controller.phase, .idle)
         XCTAssertTrue(controller.transcriptDraft.isEmpty)
+        XCTAssertTrue(controller.diaryDraft.isEmpty)
         XCTAssertTrue(controller.extractedEvents.isEmpty)
         XCTAssertTrue(controller.editableEventDrafts.isEmpty)
         XCTAssertNil(controller.temporaryAudioURL)
         XCTAssertEqual(try container.mainContext.fetch(FetchDescriptor<PetRecord>()).count, 1)
+        XCTAssertEqual(try container.mainContext.fetch(FetchDescriptor<PetRecord>()).first?.diaryText, "A faithful diary.")
         XCTAssertEqual(try container.mainContext.fetch(FetchDescriptor<PetEvent>()).count, 1)
     }
 

@@ -11,9 +11,13 @@ final class ExtractionValidator {
     private static final Logger log = LoggerFactory.getLogger(ExtractionValidator.class);
     private static final Pattern CODE = Pattern.compile("[A-Z][A-Z0-9_]{0,63}");
     private static final int MAX_DESCRIPTION = 500;
+    static final int MAX_DIARY_TEXT = 4_000;
 
-    List<ExtractedEventDraft> validate(String schemaVersion, List<ExtractedEventDraft> events) {
-        if (!"1".equals(schemaVersion)) invalid("schemaVersion", "UNSUPPORTED");
+    ValidatedExtraction validate(String schemaVersion, String diaryText, List<ExtractedEventDraft> events) {
+        if (!"2".equals(schemaVersion)) invalid("schemaVersion", "UNSUPPORTED");
+        if (diaryText == null || diaryText.isBlank()) invalid("diaryText", "BLANK");
+        if (diaryText.length() > MAX_DIARY_TEXT) invalid("diaryText", "TOO_LONG");
+        if (hasUnpairedSurrogate(diaryText)) invalid("diaryText", "INVALID_UNICODE");
         if (events == null || events.isEmpty()) invalid("events", "EMPTY");
         for (var event : events) {
             if (event == null) invalid("event", "NULL");
@@ -33,7 +37,21 @@ final class ExtractionValidator {
             if (event.numericValue() != null && !Double.isFinite(event.numericValue())) invalid("numericValue", "NON_FINITE");
             if (event.description() != null && event.description().length() > MAX_DESCRIPTION) invalid("description", "TOO_LONG");
         }
-        return List.copyOf(events);
+        return new ValidatedExtraction(diaryText.strip(), List.copyOf(events));
+    }
+
+    record ValidatedExtraction(String diaryText, List<ExtractedEventDraft> events) {}
+
+    private static boolean hasUnpairedSurrogate(String value) {
+        for (int index = 0; index < value.length(); index++) {
+            char current = value.charAt(index);
+            if (Character.isHighSurrogate(current)) {
+                if (++index >= value.length() || !Character.isLowSurrogate(value.charAt(index))) return true;
+            } else if (Character.isLowSurrogate(current)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void invalid(String field, String rule) {

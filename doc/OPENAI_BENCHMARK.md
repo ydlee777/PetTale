@@ -45,4 +45,8 @@ PARTIAL: not assessed
 FAIL: not assessed
 ```
 
+## Step 3F diary regression
+
+Schema v2 adds required `diaryText` to the same extraction response; it does not create a second provider request. Future runs of the fixed eight cases must continue evaluating the event expectations above and additionally verify that diary text faithfully retells every material fact in the approved transcript's language without translation, diagnosis, invented values, causes, emotions, treatment, or advice. The approved model/reasoning/verbosity baseline remains `gpt-5-mini` / `low` / `low`; the original optimization measurements remain the comparison baseline.
+
 Use actual provider usage metadata to assess quality, latency, and cost readiness. Do not ask an LLM to calculate cost and do not invent a dollar estimate. Physical-device verification must separately exercise Voice → SpeechAnalyzer → Transcript → OpenAI → Event Draft Review, including one Korean multi-event note; record it as not run unless it was performed on an actual iPhone.

@@ -3,12 +3,14 @@ import SwiftData
 
 enum EventDraftSaveError: LocalizedError, Equatable {
     case emptyTranscript
+    case emptyDiaryText
     case petNotFound
     case persistenceFailed
 
     var errorDescription: String? {
         switch self {
         case .emptyTranscript: String(localized: "Review the transcript before saving.")
+        case .emptyDiaryText: String(localized: "Review today's story before saving.")
         case .petNotFound: String(localized: "The recording's pet is no longer available.")
         case .persistenceFailed: String(localized: "Your events couldn't be saved. Try again.")
         }
@@ -25,6 +27,7 @@ enum EventDraftSaveService {
     static func save(
         petID: UUID,
         approvedTranscript: String,
+        approvedDiaryText: String,
         recordedAt: Date,
         drafts: [EditableEventDraft],
         in context: ModelContext,
@@ -32,6 +35,8 @@ enum EventDraftSaveService {
     ) throws -> SavedEventGraph {
         let transcript = approvedTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !transcript.isEmpty else { throw EventDraftSaveError.emptyTranscript }
+        let diaryText = approvedDiaryText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !diaryText.isEmpty else { throw EventDraftSaveError.emptyDiaryText }
         let requestedPetID = petID
         let descriptor = FetchDescriptor<Pet>(predicate: #Predicate { $0.id == requestedPetID })
         guard let pet = try context.fetch(descriptor).first else { throw EventDraftSaveError.petNotFound }
@@ -43,6 +48,7 @@ enum EventDraftSaveService {
                 let record = try PetRecord(
                     pet: pet,
                     originalTranscript: transcript,
+                    diaryText: diaryText,
                     recordedAt: recordedAt,
                     now: now
                 )
