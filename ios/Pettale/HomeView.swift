@@ -8,10 +8,18 @@ struct HomeView: View {
     @State private var recordingPet: RecordingPet?
     @State private var authentication = AuthenticationController()
     @State private var isAccountPresented = false
+    @State private var selectedTab: HomeTab = .today
 
     init(pets: [Pet]) {
         self.pets = pets
-        _selectedPetID = State(initialValue: pets.first?.id)
+        let requestedName = ProcessInfo.processInfo.environment["PETTALE_SELECTED_PET"]
+            ?? ProcessInfo.processInfo.arguments.value(after: "-pettaleSelectedPet")
+        _selectedPetID = State(initialValue: pets.first(where: { $0.name == requestedName })?.id ?? pets.first?.id)
+#if DEBUG
+        let opensDiary = ProcessInfo.processInfo.environment["PETTALE_OPEN_DIARY"] == "1"
+            || ProcessInfo.processInfo.arguments.contains("-pettaleDiary")
+        _selectedTab = State(initialValue: opensDiary ? .diary : .today)
+#endif
     }
 
     private var selectedPet: Pet? {
@@ -22,16 +30,23 @@ struct HomeView: View {
         NavigationStack {
             Group {
                 if let selectedPet {
-                    PetProfileView(
-                        pet: selectedPet,
-                        recordAction: {
-                            recordingPet = RecordingPet(id: selectedPet.id, name: selectedPet.name)
-                        },
-                        editAction: { presentedForm = .edit(selectedPet) }
-                    )
+                    TabView(selection: $selectedTab) {
+                        PetProfileView(
+                            pet: selectedPet,
+                            recordAction: { startRecording(for: selectedPet) },
+                            editAction: { presentedForm = .edit(selectedPet) }
+                        )
+                        .tabItem { Label("Today", systemImage: "house") }
+                        .tag(HomeTab.today)
+
+                        DiaryView(pet: selectedPet) { startRecording(for: selectedPet) }
+                            .tabItem { Label("Diary", systemImage: "book.closed") }
+                            .tag(HomeTab.diary)
+                    }
                 }
             }
-            .navigationTitle("Pettale")
+            .navigationTitle(selectedTab == .today ? "Pettale" : "Diary")
+            .navigationBarTitleDisplayMode(selectedTab == .today ? .large : .inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     if pets.count > 1 {
@@ -86,6 +101,15 @@ struct HomeView: View {
             set: { selectedPetID = $0 }
         )
     }
+
+    private func startRecording(for pet: Pet) {
+        recordingPet = RecordingPet(id: pet.id, name: pet.name)
+    }
+}
+
+private enum HomeTab: Hashable {
+    case today
+    case diary
 }
 
 private struct RecordingPet: Identifiable {
@@ -102,5 +126,12 @@ private enum PresentedPetForm: Identifiable {
         case .create: "create"
         case .edit(let pet): "edit-\(pet.id.uuidString)"
         }
+    }
+}
+
+private extension [String] {
+    func value(after argument: String) -> String? {
+        guard let index = firstIndex(of: argument), indices.contains(index + 1) else { return nil }
+        return self[index + 1]
     }
 }
