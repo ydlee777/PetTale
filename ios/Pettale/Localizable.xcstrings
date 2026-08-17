@@ -1945,6 +1945,13 @@
     "Tell Pettale your pet's weight when you record today's story." : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "오늘 이야기를 녹음하면서 체중도 함께 말해 주세요." } } } },
     "Weight history chart" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "체중 기록 차트" } } } },
     "Weight history period" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "체중 기록 기간" } } } },
+    "Eye Condition" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "눈 상태" } } } },
+    "Health History" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "건강 기록" } } } },
+    "Mention health-related moments in your daily recording and Pettale will keep them here." : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "건강에 관한 일을 이야기하면 Pettale이 기록해 둘게요." } } } },
+    "No health history yet" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "아직 건강 기록이 없어요" } } } },
+    "Opens health event details" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "건강 기록 상세 내용을 열어요" } } } },
+    "That Day's Story" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "그날의 이야기" } } } },
+    "Vet Visit" : { "localizations" : { "ko" : { "stringUnit" : { "state" : "translated", "value" : "동물병원 방문" } } } },
     "Today" : {
       "localizations" : {
         "ko" : { "stringUnit" : { "state" : "translated", "value" : "오늘" } }
