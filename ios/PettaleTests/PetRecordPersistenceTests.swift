@@ -9,12 +9,13 @@ final class PetRecordPersistenceTests: XCTestCase {
         try PettalePersistence.makeModelContainer(inMemory: true, cloudKitEnabled: false)
     }
 
-    func testV3SchemaAndContainerInitialize() throws {
+    func testV4SchemaAndContainerInitialize() throws {
         let container = try makeContainer()
         XCTAssertEqual(PettaleSchemaV3.versionIdentifier, Schema.Version(3, 0, 0))
-        XCTAssertEqual(PettaleSchemaV3.models.count, 3)
-        XCTAssertEqual(PettaleMigrationPlan.schemas.count, 3)
-        XCTAssertEqual(PettaleMigrationPlan.stages.count, 2)
+        XCTAssertEqual(PettaleSchemaV4.versionIdentifier, Schema.Version(4, 0, 0))
+        XCTAssertEqual(PettaleSchemaV4.models.count, 3)
+        XCTAssertEqual(PettaleMigrationPlan.schemas.count, 4)
+        XCTAssertEqual(PettaleMigrationPlan.stages.count, 3)
         XCTAssertNotNil(container.schema.entity(for: Pet.self))
         XCTAssertNotNil(container.schema.entity(for: PetRecord.self))
         XCTAssertNotNil(container.schema.entity(for: PetEvent.self))
@@ -40,6 +41,7 @@ final class PetRecordPersistenceTests: XCTestCase {
         let record = try PetRecord(
             pet: pet,
             originalTranscript: "  오늘 오레오가 잘 먹었어.  ",
+            diaryText: "  오늘 오레오는 잘 먹었어요.  ",
             recordedAt: recordedAt
         )
         context.insert(pet)
@@ -48,6 +50,7 @@ final class PetRecordPersistenceTests: XCTestCase {
 
         let fetched = try XCTUnwrap(context.fetch(FetchDescriptor<PetRecord>()).first)
         XCTAssertEqual(fetched.originalTranscript, "오늘 오레오가 잘 먹었어.")
+        XCTAssertEqual(fetched.diaryText, "오늘 오레오는 잘 먹었어요.")
         XCTAssertEqual(fetched.recordedAt, recordedAt)
         XCTAssertEqual(fetched.pet?.id, pet.id)
     }
@@ -339,5 +342,52 @@ final class PetRecordPersistenceTests: XCTestCase {
         let records = try migrated.mainContext.fetch(FetchDescriptor<PetRecord>())
         XCTAssertEqual(pets.first?.id, petID)
         XCTAssertEqual(records.first?.originalTranscript, "Existing V2 record")
+    }
+
+    func testRealV3StoreMigratesToV4AndPreservesGraphThenPersistsDiary() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appending(path: UUID().uuidString, directoryHint: .isDirectory)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let storeURL = directory.appending(path: "PettaleV3.store")
+        let petID = UUID()
+        let recordID = UUID()
+        let eventID = UUID()
+        let photo = Data([0x01, 0x02, 0x03])
+
+        do {
+            let schema = Schema(versionedSchema: PettaleSchemaV3.self)
+            let configuration = ModelConfiguration("PettalePrivateData", schema: schema, url: storeURL, cloudKitDatabase: .none)
+            let container = try ModelContainer(for: schema, configurations: [configuration])
+            let pet = try PettaleSchemaV3.Pet(id: petID, name: "Oreo", species: .cat, profilePhotoData: photo)
+            let record = try PettaleSchemaV3.PetRecord(id: recordID, pet: pet, originalTranscript: "Oreo played.")
+            let event = try PettaleSchemaV3.PetEvent(id: eventID, record: record, category: .activity, eventType: "PLAY", durationMinutes: 20)
+            container.mainContext.insert(pet)
+            container.mainContext.insert(record)
+            container.mainContext.insert(event)
+            try container.mainContext.save()
+        }
+
+        do {
+            let migrated = try PettalePersistence.makeModelContainer(cloudKitEnabled: false, storeURL: storeURL)
+            let pet = try XCTUnwrap(migrated.mainContext.fetch(FetchDescriptor<Pet>()).first)
+            let oldRecord = try XCTUnwrap(migrated.mainContext.fetch(FetchDescriptor<PetRecord>()).first)
+            let oldEvent = try XCTUnwrap(migrated.mainContext.fetch(FetchDescriptor<PetEvent>()).first)
+            XCTAssertEqual(pet.id, petID)
+            XCTAssertEqual(pet.profilePhotoData, photo)
+            XCTAssertEqual(oldRecord.id, recordID)
+            XCTAssertEqual(oldRecord.originalTranscript, "Oreo played.")
+            XCTAssertNil(oldRecord.diaryText)
+            XCTAssertEqual(oldRecord.pet?.id, petID)
+            XCTAssertEqual(oldEvent.id, eventID)
+            XCTAssertEqual(oldEvent.record?.id, recordID)
+            XCTAssertEqual(oldEvent.eventType, "PLAY")
+            migrated.mainContext.insert(try PetRecord(pet: pet, originalTranscript: "Oreo ate.", diaryText: "Oreo ate well today."))
+            try migrated.mainContext.save()
+        }
+
+        let reopened = try PettalePersistence.makeModelContainer(cloudKitEnabled: false, storeURL: storeURL)
+        let diaries = try reopened.mainContext.fetch(FetchDescriptor<PetRecord>()).compactMap(\.diaryText)
+        XCTAssertEqual(diaries, ["Oreo ate well today."])
     }
 }

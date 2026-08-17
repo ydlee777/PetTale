@@ -1,8 +1,8 @@
 import Foundation
 import SwiftData
 
-enum PettaleSchemaV3: VersionedSchema {
-    static let versionIdentifier = Schema.Version(3, 0, 0)
+enum PettaleSchemaV4: VersionedSchema {
+    static let versionIdentifier = Schema.Version(4, 0, 0)
     static let models: [any PersistentModel.Type] = [Pet.self, PetRecord.self, PetEvent.self]
 
     @Model
@@ -96,6 +96,7 @@ enum PettaleSchemaV3: VersionedSchema {
         private(set) var id: UUID = UUID()
         var pet: Pet?
         private(set) var originalTranscript: String = ""
+        private(set) var diaryText: String?
         private(set) var recordedAt: Date = Date()
         private(set) var createdAt: Date = Date()
         private(set) var updatedAt: Date = Date()
@@ -106,12 +107,14 @@ enum PettaleSchemaV3: VersionedSchema {
             id: UUID = UUID(),
             pet: Pet,
             originalTranscript: String,
+            diaryText: String? = nil,
             recordedAt: Date = Date(),
             now: Date = Date()
         ) throws {
             self.id = id
             self.pet = pet
             self.originalTranscript = try Self.validatedTranscript(originalTranscript)
+            self.diaryText = Self.normalizedDiaryText(diaryText)
             self.recordedAt = recordedAt
             self.createdAt = now
             self.updatedAt = now
@@ -119,12 +122,20 @@ enum PettaleSchemaV3: VersionedSchema {
 
         func update(
             originalTranscript: String,
+            diaryText: String? = nil,
             recordedAt: Date,
             at updatedAt: Date = Date()
         ) throws {
             self.originalTranscript = try Self.validatedTranscript(originalTranscript)
+            self.diaryText = Self.normalizedDiaryText(diaryText)
             self.recordedAt = recordedAt
             self.updatedAt = updatedAt
+        }
+
+        private static func normalizedDiaryText(_ value: String?) -> String? {
+            guard let value else { return nil }
+            let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed.isEmpty ? nil : trimmed
         }
 
         private static func validatedTranscript(_ value: String) throws -> String {
@@ -224,6 +235,6 @@ enum PettaleSchemaV3: VersionedSchema {
     }
 }
 
-typealias PetV3 = PettaleSchemaV3.Pet
-typealias PetRecordV3 = PettaleSchemaV3.PetRecord
-typealias PetEventV3 = PettaleSchemaV3.PetEvent
+typealias Pet = PettaleSchemaV4.Pet
+typealias PetRecord = PettaleSchemaV4.PetRecord
+typealias PetEvent = PettaleSchemaV4.PetEvent

@@ -77,7 +77,7 @@ class AiExtractionIntegrationTests {
 
         var response = perform(token(user.getId()), validRequest()).getResponse();
         assertThat(response.getStatus()).isEqualTo(200);
-        assertThat(response.getContentAsString()).contains("\"schemaVersion\":\"1\"", "BODY_WEIGHT", "6.2");
+        assertThat(response.getContentAsString()).contains("\"schemaVersion\":\"2\"", "\"diaryText\"", "BODY_WEIGHT", "6.2");
         verify(provider).extractEvents(any());
         assertThat(usages.findAll()).singleElement().satisfies(usage -> {
             assertThat(usage.getStatus()).isEqualTo(AiUsageStatus.SUCCEEDED);
@@ -114,8 +114,8 @@ class AiExtractionIntegrationTests {
     }
 
     @Test void emptyOrWrongVersionResultIsRejected() throws Exception {
-        assertInvalidResult(new AiProvider.ExtractionResult("OPENAI", "model", 1, 1, "id", "1", List.of()));
-        assertInvalidResult(new AiProvider.ExtractionResult("OPENAI", "model", 1, 1, "id", "2", events(EventCategory.OTHER)));
+        assertInvalidResult(new AiProvider.ExtractionResult("OPENAI", "model", 1, 1, "id", "1", "Diary", List.of()));
+        assertInvalidResult(new AiProvider.ExtractionResult("OPENAI", "model", 1, 1, "id", "2", " ", events(EventCategory.OTHER)));
     }
 
     @Test void providerFailuresReturnSafeErrorsAndFinalizeUsage() throws Exception {
@@ -231,7 +231,7 @@ class AiExtractionIntegrationTests {
     }
 
     private AiProvider.ExtractionResult result(List<ExtractedEventDraft> events) {
-        return new AiProvider.ExtractionResult("OPENAI", "gpt-5-mini-2025-08-07", 100, 40, "resp_test", "1", events);
+        return new AiProvider.ExtractionResult("OPENAI", "gpt-5-mini-2025-08-07", 100, 40, "resp_test", "2", "A faithful diary.", events);
     }
 
     private String validRequest() {

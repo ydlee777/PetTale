@@ -1,6 +1,6 @@
 # Pettale
 
-Pettale (*Pet + Tale*) is an iPhone-first, privacy-conscious pet life diary. The V1 architecture uses a native SwiftUI client for the private pet experience and a Java/Spring Boot modular monolith for service functions; Step 0 contains foundation shells only and no product features.
+Pettale (*Pet + Tale*) is an iPhone-first, privacy-conscious pet life diary. Its native SwiftUI client keeps approved transcripts, editable daily tales, and structured events in SwiftData/private CloudKit, while a Java/Spring Boot modular monolith provides transient single-call AI extraction and service operations without retaining private pet history.
 
 ## Repository structure
 

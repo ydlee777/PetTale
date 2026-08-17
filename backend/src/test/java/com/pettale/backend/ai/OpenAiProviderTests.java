@@ -37,7 +37,7 @@ class OpenAiProviderTests {
         assertThat(request.path("reasoning").path("effort").asText()).isEqualTo("minimal");
         assertThat(request.path("text").path("verbosity").asText()).isEqualTo("low");
         assertThat(request.path("text").path("format").path("type").asText()).isEqualTo("json_schema");
-        assertThat(request.path("text").path("format").path("name").asText()).isEqualTo("pettale_event_extraction_v1");
+        assertThat(request.path("text").path("format").path("name").asText()).isEqualTo("pettale_event_extraction_v2");
         assertThat(request.path("text").path("format").path("strict").asBoolean()).isTrue();
         assertThat(request.path("text").path("format").path("schema").path("additionalProperties").asBoolean()).isFalse();
         assertThat(request.path("instructions").asText())
@@ -57,6 +57,7 @@ class OpenAiProviderTests {
         assertThat(result.inputTokens()).isEqualTo(123);
         assertThat(result.outputTokens()).isEqualTo(45);
         assertThat(result.providerRequestId()).isEqualTo("resp_contract_test");
+        assertThat(result.diaryText()).isEqualTo("Oreo weighs 6.2 kg today.");
         assertThat(result.events()).singleElement().satisfies(event -> {
             assertThat(event.category()).isEqualTo(EventCategory.WEIGHT);
             assertThat(event.eventType()).isEqualTo("BODY_WEIGHT");
@@ -189,7 +190,7 @@ class OpenAiProviderTests {
 
     private String validResponse() throws Exception {
         var output = """
-                {"schemaVersion":"1","events":[{"category":"WEIGHT","eventType":" body_weight ",
+                {"schemaVersion":"2","diaryText":"Oreo weighs 6.2 kg today.","events":[{"category":"WEIGHT","eventType":" body_weight ",
                 "occurredAt":"2026-08-16T12:00:00Z","numericValue":6.2,"unit":"kg",
                 "count":null,"durationMinutes":null,"description":null}]}
                 """;

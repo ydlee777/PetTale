@@ -21,5 +21,6 @@ public interface AiProvider {
             long outputTokens,
             String providerRequestId,
             String schemaVersion,
+            String diaryText,
             List<ExtractedEventDraft> events) {}
 }

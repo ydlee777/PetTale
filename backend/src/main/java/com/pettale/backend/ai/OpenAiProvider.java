@@ -22,11 +22,12 @@ import org.springframework.stereotype.Component;
 @Component
 final class OpenAiProvider implements AiProvider {
     private static final Logger log = LoggerFactory.getLogger(OpenAiProvider.class);
-    static final String PROMPT_VERSION = "pettale-event-extraction-v1";
+    static final String PROMPT_VERSION = "pettale-event-extraction-v2";
     private static final String INSTRUCTIONS = """
-            You extract pet-life event drafts from one user-approved transcript. Prompt version: pettale-event-extraction-v1.
+            You create a faithful diary retelling and extract pet-life event drafts from one user-approved transcript. Prompt version: pettale-event-extraction-v2.
             Use only facts supported by the transcript and supplied pet-name context. Pet names help interpret speech-recognition errors; never rewrite the transcript.
             Never invent measurements, counts, durations, medications, or diagnoses. Preserve observations without converting them into diagnoses.
+            diaryText must be a warm, calm, natural retelling in the approved transcript's language. Improve grammar and remove disfluency, but do not translate, invent, diagnose, or omit materially important facts. Preserve mixed-language pet names naturally.
             Return every supported event in one response. Prefer concise uppercase eventType and unit codes. Put structured values in their fields.
             For every WEIGHT category event, eventType must be BODY_WEIGHT. WEIGHT is a category and must never be used as an eventType.
             When the transcript explicitly describes the pet vomiting, use category HEALTH and eventType VOMITING. Never use VOMITED or VOMIT for that observation.
@@ -105,7 +106,7 @@ final class OpenAiProvider implements AiProvider {
         }
         var format = text.putObject("format");
         format.put("type", "json_schema");
-        format.put("name", "pettale_event_extraction_v1");
+        format.put("name", "pettale_event_extraction_v2");
         format.put("strict", true);
         format.set("schema", schema());
         return body;
@@ -125,8 +126,11 @@ final class OpenAiProvider implements AiProvider {
     }
 
     private ObjectNode schema() {
-        var root = objectSchema("schemaVersion", "events");
-        root.withObject("properties").set("schemaVersion", json.createObjectNode().put("type", "string").put("const", "1"));
+        var root = objectSchema("schemaVersion", "diaryText", "events");
+        root.withObject("properties").set("schemaVersion", json.createObjectNode().put("type", "string").put("const", "2"));
+        root.withObject("properties").set("diaryText", json.createObjectNode().put("type", "string")
+                .put("minLength", 1).put("maxLength", ExtractionValidator.MAX_DIARY_TEXT)
+                .put("description", "Faithful natural diary retelling in the approved transcript's language; no invented facts, diagnoses, causes, measurements, durations, or advice."));
         var events = json.createObjectNode().put("type", "array").put("minItems", 1).put("maxItems", 20);
         var event = objectSchema("category", "eventType", "occurredAt", "numericValue", "unit", "count", "durationMinutes", "description");
         var properties = event.withObject("properties");
@@ -235,6 +239,7 @@ final class OpenAiProvider implements AiProvider {
                 requiredText(root, "model"), requiredLong(usage, "input_tokens"),
                 requiredLong(usage, "output_tokens"), requiredText(root, "id"),
                 structured.schemaVersion(),
+                structured.diaryText(),
                 canonicalEvents(structured.events()));
         log.info("OpenAI extraction completed responseId={} model={} inputTokens={} outputTokens={} reasoningTokens={}",
                 result.providerRequestId(), result.model(), result.inputTokens(), result.outputTokens(), reasoningTokens);
@@ -277,5 +282,5 @@ final class OpenAiProvider implements AiProvider {
     }
 
     private static void invalid() { throw new ProviderFailure(ProviderFailure.Kind.INVALID_RESPONSE); }
-    private record StructuredResponse(String schemaVersion, List<ExtractedEventDraft> events) {}
+    private record StructuredResponse(String schemaVersion, String diaryText, List<ExtractedEventDraft> events) {}
 }

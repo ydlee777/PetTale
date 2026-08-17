@@ -34,6 +34,7 @@
 		E00000000000000000000013 /* PettaleSchemaV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000000000000000000003 /* PettaleSchemaV2.swift */; };
 		E00000000000000000000014 /* PetRecordPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000000000000000000004 /* PetRecordPersistenceTests.swift */; };
 		G00000000000000000000011 /* PettaleSchemaV3.swift in Sources */ = {isa = PBXBuildFile; fileRef = G00000000000000000000001 /* PettaleSchemaV3.swift */; };
+		K00000000000000000000011 /* PettaleSchemaV4.swift in Sources */ = {isa = PBXBuildFile; fileRef = K00000000000000000000001 /* PettaleSchemaV4.swift */; };
 		F00000000000000000000011 /* AuthenticationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000001 /* AuthenticationModels.swift */; };
 		F00000000000000000000012 /* AuthenticationNonce.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000002 /* AuthenticationNonce.swift */; };
 		F00000000000000000000013 /* KeychainSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000003 /* KeychainSessionStore.swift */; };
@@ -91,6 +92,7 @@
 		E00000000000000000000003 /* PettaleSchemaV2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PettaleSchemaV2.swift; sourceTree = "<group>"; };
 		E00000000000000000000004 /* PetRecordPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetRecordPersistenceTests.swift; sourceTree = "<group>"; };
 		G00000000000000000000001 /* PettaleSchemaV3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PettaleSchemaV3.swift; sourceTree = "<group>"; };
+		K00000000000000000000001 /* PettaleSchemaV4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PettaleSchemaV4.swift; sourceTree = "<group>"; };
 		F00000000000000000000001 /* AuthenticationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationModels.swift; sourceTree = "<group>"; };
 		F00000000000000000000002 /* AuthenticationNonce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationNonce.swift; sourceTree = "<group>"; };
 		F00000000000000000000003 /* KeychainSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainSessionStore.swift; sourceTree = "<group>"; };
@@ -200,6 +202,7 @@
 				A00000000000000000000009 /* PettaleSchemaV1.swift */,
 				E00000000000000000000003 /* PettaleSchemaV2.swift */,
 				G00000000000000000000001 /* PettaleSchemaV3.swift */,
+				K00000000000000000000001 /* PettaleSchemaV4.swift */,
 				A0000000000000000000000A /* PettaleMigrationPlan.swift */,
 				A0000000000000000000000B /* PettalePersistence.swift */,
 				I00000000000000000000002 /* EventDraftSaveService.swift */,
@@ -369,6 +372,7 @@
 				A00000000000000000000017 /* PettaleSchemaV1.swift in Sources */,
 				E00000000000000000000013 /* PettaleSchemaV2.swift in Sources */,
 				G00000000000000000000011 /* PettaleSchemaV3.swift in Sources */,
+				K00000000000000000000011 /* PettaleSchemaV4.swift in Sources */,
 				F00000000000000000000011 /* AuthenticationModels.swift in Sources */,
 				F00000000000000000000012 /* AuthenticationNonce.swift in Sources */,
 				F00000000000000000000013 /* KeychainSessionStore.swift in Sources */,
