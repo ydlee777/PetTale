@@ -12,6 +12,7 @@ struct HomeView: View {
 #if DEBUG
     private let opensDevelopmentWeight: Bool
     private let opensDevelopmentHealth: Bool
+    private let opensDevelopmentStatistics: Bool
 #endif
 
     init(pets: [Pet]) {
@@ -27,6 +28,8 @@ struct HomeView: View {
             || ProcessInfo.processInfo.arguments.contains("-pettaleWeight")
         opensDevelopmentHealth = ProcessInfo.processInfo.environment["PETTALE_OPEN_HEALTH"] == "1"
             || ProcessInfo.processInfo.arguments.contains("-pettaleHealth")
+        opensDevelopmentStatistics = ProcessInfo.processInfo.environment["PETTALE_OPEN_STATISTICS"] == "1"
+            || ProcessInfo.processInfo.arguments.contains("-pettaleStatistics")
 #endif
     }
 
@@ -39,7 +42,9 @@ struct HomeView: View {
             Group {
                 if let selectedPet {
 #if DEBUG
-                    if opensDevelopmentHealth {
+                    if opensDevelopmentStatistics {
+                        PeriodStatisticsView(pet: selectedPet) { startRecording(for: selectedPet) }
+                    } else if opensDevelopmentHealth {
                         HealthHistoryView(pet: selectedPet) { startRecording(for: selectedPet) }
                     } else if opensDevelopmentWeight {
                         WeightTrendView(pet: selectedPet) { startRecording(for: selectedPet) }

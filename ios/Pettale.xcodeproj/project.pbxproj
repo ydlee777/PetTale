@@ -58,6 +58,9 @@
 		N00000000000000000000011 /* HealthHistoryPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = N00000000000000000000001 /* HealthHistoryPresentation.swift */; };
 		N00000000000000000000012 /* HealthHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = N00000000000000000000002 /* HealthHistoryView.swift */; };
 		N00000000000000000000013 /* HealthHistoryPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N00000000000000000000003 /* HealthHistoryPresentationTests.swift */; };
+		O00000000000000000000011 /* PeriodStatisticsPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = O00000000000000000000001 /* PeriodStatisticsPresentation.swift */; };
+		O00000000000000000000012 /* PeriodStatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = O00000000000000000000002 /* PeriodStatisticsView.swift */; };
+		O00000000000000000000013 /* PeriodStatisticsPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = O00000000000000000000003 /* PeriodStatisticsPresentationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -126,6 +129,9 @@
 		N00000000000000000000001 /* HealthHistoryPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthHistoryPresentation.swift; sourceTree = "<group>"; };
 		N00000000000000000000002 /* HealthHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthHistoryView.swift; sourceTree = "<group>"; };
 		N00000000000000000000003 /* HealthHistoryPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthHistoryPresentationTests.swift; sourceTree = "<group>"; };
+		O00000000000000000000001 /* PeriodStatisticsPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodStatisticsPresentation.swift; sourceTree = "<group>"; };
+		O00000000000000000000002 /* PeriodStatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodStatisticsView.swift; sourceTree = "<group>"; };
+		O00000000000000000000003 /* PeriodStatisticsPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodStatisticsPresentationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -165,6 +171,7 @@
 				L00000000000000000000004 /* DiaryDevelopmentSeed.swift */,
 				M00000000000000000000002 /* WeightTrendView.swift */,
 				N00000000000000000000002 /* HealthHistoryView.swift */,
+				O00000000000000000000002 /* PeriodStatisticsView.swift */,
 				B00000000000000000000004 /* PetFormView.swift */,
 				B00000000000000000000005 /* PetProfileView.swift */,
 				C00000000000000000000003 /* RecordingFlowView.swift */,
@@ -196,6 +203,7 @@
 				L00000000000000000000003 /* DiaryPresentationTests.swift */,
 				M00000000000000000000003 /* WeightTrendPresentationTests.swift */,
 				N00000000000000000000003 /* HealthHistoryPresentationTests.swift */,
+				O00000000000000000000003 /* PeriodStatisticsPresentationTests.swift */,
 			);
 			path = PettaleTests;
 			sourceTree = "<group>";
@@ -222,6 +230,7 @@
 				L00000000000000000000001 /* DiaryPresentation.swift */,
 				M00000000000000000000001 /* WeightTrendPresentation.swift */,
 				N00000000000000000000001 /* HealthHistoryPresentation.swift */,
+				O00000000000000000000001 /* PeriodStatisticsPresentation.swift */,
 			);
 			path = Domain;
 			sourceTree = "<group>";
@@ -421,6 +430,8 @@
 				M00000000000000000000012 /* WeightTrendView.swift in Sources */,
 				N00000000000000000000011 /* HealthHistoryPresentation.swift in Sources */,
 				N00000000000000000000012 /* HealthHistoryView.swift in Sources */,
+				O00000000000000000000011 /* PeriodStatisticsPresentation.swift in Sources */,
+				O00000000000000000000012 /* PeriodStatisticsView.swift in Sources */,
 				A00000000000000000000018 /* PettaleMigrationPlan.swift in Sources */,
 				A00000000000000000000019 /* PettalePersistence.swift in Sources */,
 			);
@@ -439,6 +450,7 @@
 				L00000000000000000000013 /* DiaryPresentationTests.swift in Sources */,
 				M00000000000000000000013 /* WeightTrendPresentationTests.swift in Sources */,
 				N00000000000000000000013 /* HealthHistoryPresentationTests.swift in Sources */,
+				O00000000000000000000013 /* PeriodStatisticsPresentationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

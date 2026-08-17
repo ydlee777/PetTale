@@ -65,6 +65,23 @@ struct PetProfileView: View {
                 .buttonStyle(.plain)
                 .accessibilityHint("Shows health history for \(pet.name)")
 
+                NavigationLink {
+                    PeriodStatisticsView(pet: pet, recordAction: recordAction)
+                } label: {
+                    HStack {
+                        Label("Record Summary", systemImage: "calendar.badge.clock")
+                            .font(.headline)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption.bold())
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding()
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20))
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Shows record summary for \(pet.name)")
+
                 VStack(spacing: 0) {
                     if pet.sex != .unknown { profileRow("Sex", value: pet.sex.localizedName) }
                     if let birthDate = pet.birthDate { profileRow("Birthday", value: birthDate.formatted(date: .long, time: .omitted)) }
