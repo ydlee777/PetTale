@@ -40,8 +40,10 @@ export PETTALE_DB_PASSWORD='your-local-password'
 export PETTALE_APPLE_AUDIENCE='com.pettale.app'
 export PETTALE_SESSION_SIGNING_KEY='base64-of-at-least-32-random-bytes'
 export PETTALE_SESSION_LIFETIME='P30D'
-# Local QA override; the checked-in server default remains 25.
-export PETTALE_AI_MONTHLY_REQUEST_LIMIT='1000'
+# Local QA overrides; checked-in defaults are FREE=3 and TRIAL/PREMIUM=100.
+export PETTALE_AI_FREE_MONTHLY_REQUEST_LIMIT='1000'
+export PETTALE_AI_PREMIUM_MONTHLY_REQUEST_LIMIT='1000'
+export PETTALE_TRIAL_DURATION='P30D'
 export PETTALE_EXTRACTION_MODEL='gpt-5-mini'
 export PETTALE_OPENAI_API_KEY='your-server-only-development-key'
 export PETTALE_OPENAI_TIMEOUT='PT30S'
@@ -60,3 +62,5 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home mvn -f 
 Sign in with Apple is optional for local pet history and is used only to create a backend service session. See [`doc/AUTHENTICATION.md`](doc/AUTHENTICATION.md) for the verification flow, session lifecycle, environment variables, and Apple Developer setup.
 
 The authenticated AI gateway reserves usage before calling OpenAI and returns validated transient event drafts without storing pet history. See [`doc/AI_GATEWAY.md`](doc/AI_GATEWAY.md) for quota, concurrency, privacy, and provider semantics, and [`doc/OPENAI_BENCHMARK.md`](doc/OPENAI_BENCHMARK.md) for the manual real-provider validation procedure.
+
+`GET /api/v1/service-access` returns the authenticated user's derived FREE/PREMIUM_TRIAL service state and authoritative monthly AI usage. The 30-day trial begins only with the first successful extraction; StoreKit purchase processing is intentionally not part of this foundation.

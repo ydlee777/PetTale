@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.time.Duration;
 import java.util.UUID;
 
 @Entity
@@ -20,6 +21,10 @@ public class ServiceUser {
     private Instant createdAt;
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+    @Column(name = "trial_started_at")
+    private Instant trialStartedAt;
+    @Column(name = "trial_expires_at")
+    private Instant trialExpiresAt;
 
     protected ServiceUser() {}
 
@@ -36,6 +41,15 @@ public class ServiceUser {
     public String getEmail() { return email; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public Instant getTrialStartedAt() { return trialStartedAt; }
+    public Instant getTrialExpiresAt() { return trialExpiresAt; }
+
+    public void activateTrialIfEligible(Instant activationInstant, Duration duration) {
+        if (trialStartedAt != null || trialExpiresAt != null) return;
+        trialStartedAt = activationInstant;
+        trialExpiresAt = activationInstant.plus(duration);
+        updatedAt = activationInstant;
+    }
 
     public void captureVerifiedEmailIfMissing(String verifiedEmail, Instant now) {
         if (email == null && verifiedEmail != null && !verifiedEmail.isBlank()) {

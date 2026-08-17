@@ -12,6 +12,8 @@ Pettale keeps pet profiles and history in the iOS SwiftData/CloudKit boundary. S
 
 The health endpoint and Apple authentication entry point are public. Every other backend endpoint requires a valid Pettale bearer token. Tokens, nonces, and signing material must not be logged.
 
+`GET /api/v1/service-access` derives ownership exclusively from the verified Pettale JWT subject. It does not accept a user ID, Apple subject, or email from the client and returns only service plan, trial dates/eligibility, and monthly AI allowance usage.
+
 ## Configuration
 
 Backend configuration is supplied through `PETTALE_APPLE_AUDIENCE`, `PETTALE_APPLE_ISSUER`, `PETTALE_APPLE_JWK_SET_URI`, `PETTALE_SESSION_ISSUER`, `PETTALE_SESSION_LIFETIME`, and `PETTALE_SESSION_SIGNING_KEY`. The signing key is Base64-encoded material of at least 32 random bytes and must remain outside source control.

@@ -1,5 +1,7 @@
 package com.pettale.backend.usage;
 
+import com.pettale.backend.access.ServiceAccess;
+import com.pettale.backend.access.ServiceAccessPolicy;
 import com.pettale.backend.identity.ServiceUserRepository;
 import java.time.Clock;
 import java.time.Instant;
@@ -20,20 +22,19 @@ public class AiUsageService {
     private final ServiceUserRepository users;
     private final AiUsageRepository usages;
     private final Clock clock;
-    private final int monthlyLimit;
+    private final ServiceAccessPolicy accessPolicy;
     private final Duration reservationTimeout;
 
     public AiUsageService(ServiceUserRepository users, AiUsageRepository usages, Clock clock,
-            @Value("${pettale.ai.monthly-request-limit}") int monthlyLimit,
+            ServiceAccessPolicy accessPolicy,
             @Value("${pettale.ai.reservation-timeout}") Duration reservationTimeout) {
-        if (monthlyLimit < 0) throw new IllegalArgumentException("Monthly AI request limit must be nonnegative");
         if (reservationTimeout.isNegative() || reservationTimeout.isZero()) {
             throw new IllegalArgumentException("AI reservation timeout must be positive");
         }
         this.users = users;
         this.usages = usages;
         this.clock = clock;
-        this.monthlyLimit = monthlyLimit;
+        this.accessPolicy = accessPolicy;
         this.reservationTimeout = reservationTimeout;
     }
 
@@ -45,14 +46,19 @@ public class AiUsageService {
                 .forEach(usage -> usage.fail(AiFailureCategory.STALE_RESERVATION, now));
         var window = utcMonth(now);
         var counted = usages.countInWindow(userId, operation, COUNTED_STATUSES, window.start(), window.end());
-        if (counted >= monthlyLimit) throw new AiQuotaExceeded();
+        var access = accessPolicy.resolve(user, now);
+        if (counted >= access.monthlyAiLimit()) throw new AiQuotaExceeded();
         return usages.save(new AiUsage(UUID.randomUUID(), user, operation, now));
     }
 
     @Transactional
     public AiUsage succeed(UUID usageId, AiProviderMetadata metadata) {
         var usage = usages.findById(usageId).orElseThrow(() -> new IllegalArgumentException("Unknown AI usage"));
-        usage.succeed(metadata, clock.instant());
+        var now = clock.instant();
+        var user = users.findByIdForUpdate(usage.getServiceUserId())
+                .orElseThrow(() -> new IllegalArgumentException("Unknown service user"));
+        usage.succeed(metadata, now);
+        accessPolicy.activateTrialIfEligible(user, now);
         return usage;
     }
 
@@ -63,6 +69,17 @@ public class AiUsageService {
         return usage;
     }
 
+    @Transactional(readOnly = true)
+    public ServiceAccessUsage serviceAccess(UUID userId) {
+        var user = users.findById(userId).orElseThrow(() -> new IllegalArgumentException("Unknown service user"));
+        var now = clock.instant();
+        var access = accessPolicy.resolve(user, now);
+        var window = utcMonth(now);
+        var used = usages.countInWindow(
+                userId, AiOperation.EVENT_EXTRACTION, COUNTED_STATUSES, window.start(), window.end());
+        return new ServiceAccessUsage(access, used, Math.max(0, access.monthlyAiLimit() - used));
+    }
+
     static UsageWindow utcMonth(Instant instant) {
         var start = instant.atZone(ZoneOffset.UTC).with(TemporalAdjusters.firstDayOfMonth()).toLocalDate()
                 .atStartOfDay(ZoneOffset.UTC).toInstant();
@@ -70,4 +87,6 @@ public class AiUsageService {
     }
 
     record UsageWindow(Instant start, Instant end) {}
+
+    public record ServiceAccessUsage(ServiceAccess access, long used, long remaining) {}
 }

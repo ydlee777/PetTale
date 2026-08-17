@@ -39,7 +39,8 @@ import org.springframework.web.context.WebApplicationContext;
         "spring.datasource.username=sa",
         "spring.datasource.password=",
         "pettale.session.signing-key=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
-        "pettale.ai.monthly-request-limit=1"
+        "pettale.ai.free-monthly-request-limit=1",
+        "pettale.ai.premium-monthly-request-limit=1"
 })
 class AiExtractionIntegrationTests {
     private static final Instant NOW = Instant.parse("2026-08-16T12:00:00Z");
@@ -87,6 +88,7 @@ class AiExtractionIntegrationTests {
             assertThat(usage.getOutputTokens()).isEqualTo(40);
             assertThat(usage.getProviderRequestId()).isEqualTo("resp_test");
         });
+        assertThat(users.findById(user.getId()).orElseThrow().getTrialStartedAt()).isEqualTo(NOW);
     }
 
     @Test void quotaExceededDoesNotCallProviderAgain() throws Exception {
@@ -201,6 +203,7 @@ class AiExtractionIntegrationTests {
             assertThat(usage.getStatus()).isEqualTo(AiUsageStatus.FAILED);
             assertThat(usage.getFailureCategory()).isEqualTo(AiFailureCategory.INVALID_STRUCTURED_OUTPUT);
         });
+        assertThat(users.findById(user.getId()).orElseThrow().getTrialStartedAt()).isNull();
     }
 
     private void assertFailure(ProviderFailure.Kind kind, int status, AiFailureCategory category) throws Exception {
@@ -214,6 +217,7 @@ class AiExtractionIntegrationTests {
             assertThat(usage.getStatus()).isEqualTo(AiUsageStatus.FAILED);
             assertThat(usage.getFailureCategory()).isEqualTo(category);
         });
+        assertThat(users.findById(user.getId()).orElseThrow().getTrialStartedAt()).isNull();
     }
 
     private org.springframework.test.web.servlet.MvcResult perform(String token, String content) throws Exception {

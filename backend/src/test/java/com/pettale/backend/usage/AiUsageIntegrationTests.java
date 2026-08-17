@@ -42,7 +42,8 @@ import org.springframework.web.bind.annotation.RestController;
         "spring.datasource.password=${PETTALE_TEST_DB_PASSWORD:}",
         "spring.jpa.hibernate.ddl-auto=validate",
         "pettale.session.signing-key=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
-        "pettale.ai.monthly-request-limit=2"
+        "pettale.ai.free-monthly-request-limit=2",
+        "pettale.ai.premium-monthly-request-limit=2"
 })
 @Import(AiUsageIntegrationTests.TestAiBoundaryConfiguration.class)
 class AiUsageIntegrationTests {
