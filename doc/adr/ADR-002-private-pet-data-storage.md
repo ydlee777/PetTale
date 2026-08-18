@@ -1,30 +1,34 @@
 # ADR-002: Private Pet Data Storage and Cloud Synchronization
 
+> **Product rename note (2026-08-18):** Pettale was renamed to Oreamy
+> before release. The decision itself is unchanged; current product
+> references use Oreamy.
+
 - **Status:** Accepted
 - **Date:** 2026-08-16
-- **Decision Owners:** Pettale
-- **Applies To:** Pettale V1
+- **Decision Owners:** Oreamy
+- **Applies To:** Oreamy V1
 
 ## Context
 
-Pettale records a pet's long-term personal history, including diary entries, health-related events, weight, food, medication, behavior, activity, veterinary events, photos, and original voice-note transcripts.
+Oreamy records a pet's long-term personal history, including diary entries, health-related events, weight, food, medication, behavior, activity, veterinary events, photos, and original voice-note transcripts.
 
-This information is central to the user's relationship with Pettale and should be treated as private user data.
+This information is central to the user's relationship with Oreamy and should be treated as private user data.
 
-Users must also be able to change iPhones without losing their Pettale history.
+Users must also be able to change iPhones without losing their Oreamy history.
 
-At the same time, Pettale requires a lightweight service backend for account, subscription, trial, AI usage, and AI gateway functions.
+At the same time, Oreamy requires a lightweight service backend for account, subscription, trial, AI usage, and AI gateway functions.
 
-Storing the complete pet diary in Pettale's own backend would increase privacy, security, infrastructure, retention, and operational responsibilities without being necessary for V1.
+Storing the complete pet diary in Oreamy's own backend would increase privacy, security, infrastructure, retention, and operational responsibilities without being necessary for V1.
 
 ## Decision
 
-The authoritative private pet history for Pettale V1 will be stored using:
+The authoritative private pet history for Oreamy V1 will be stored using:
 
 - **SwiftData** for local structured persistence.
 - **CloudKit / iCloud** for private synchronization and recovery across the user's Apple environment.
 
-The Pettale service backend will **not** be the permanent source of truth for private pet diary/history data in V1.
+The Oreamy service backend will **not** be the permanent source of truth for private pet diary/history data in V1.
 
 Private pet data includes, unless explicitly decided otherwise:
 
@@ -52,7 +56,7 @@ After successful transcription, temporary audio should be deleted unless a separ
 
 AI operations require some user content to be processed outside the device.
 
-Transcript text and compact structured context may therefore be transmitted through the Pettale backend to the configured AI provider when required to fulfill an explicit AI operation.
+Transcript text and compact structured context may therefore be transmitted through the Oreamy backend to the configured AI provider when required to fulfill an explicit AI operation.
 
 This processing does not change the storage boundary.
 
@@ -64,7 +68,7 @@ This architecture:
 
 - Keeps private pet history close to the user.
 - Uses the Apple ecosystem for device synchronization.
-- Reduces Pettale backend storage requirements.
+- Reduces Oreamy backend storage requirements.
 - Reduces privacy/security exposure.
 - Keeps the service backend lightweight.
 - Allows a new iPhone to restore/synchronize history through the user's Apple environment.
@@ -77,7 +81,7 @@ This architecture:
 - Smaller privacy and security attack surface.
 - Natural fit for an iPhone-first application.
 - User history can follow the user's Apple/iCloud environment.
-- Clear separation between personal data and Pettale service-management data.
+- Clear separation between personal data and Oreamy service-management data.
 
 ### Negative / Trade-offs
 
@@ -95,13 +99,13 @@ This architecture:
 5. Keep temporary audio local and delete it after successful transcription by default.
 6. Do not automatically send photos to an AI provider in V1.
 7. Define migration/versioning rules before making incompatible SwiftData/CloudKit schema changes.
-8. Collect and retain only service data necessary to operate Pettale.
+8. Collect and retain only service data necessary to operate Oreamy.
 
 ## Future Android
 
 This ADR intentionally optimizes V1 for iPhone.
 
-If Android becomes an approved product, Pettale must explicitly decide how private history synchronizes across Apple and Android devices. That decision may supersede or amend this ADR.
+If Android becomes an approved product, Oreamy must explicitly decide how private history synchronizes across Apple and Android devices. That decision may supersede or amend this ADR.
 
 Do not prematurely add a cross-platform pet-data backend solely for hypothetical Android support.
 

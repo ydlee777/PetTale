@@ -1,37 +1,41 @@
 spring:
   application:
-    name: pettale-backend
+    name: oreamy-backend
   datasource:
-    url: ${PETTALE_DB_URL:jdbc:postgresql://localhost:5432/pettale}
-    username: ${PETTALE_DB_USERNAME:pettale}
-    password: ${PETTALE_DB_PASSWORD:}
+    url: ${OREAMY_DB_URL:jdbc:postgresql://localhost:5432/pettale}
+    username: ${OREAMY_DB_USERNAME:pettale}
+    password: ${OREAMY_DB_PASSWORD:}
   jpa:
     hibernate:
       ddl-auto: validate
     open-in-view: false
   flyway:
     enabled: true
-pettale:
+oreamy:
   apple:
-    issuer: ${PETTALE_APPLE_ISSUER:https://appleid.apple.com}
-    audience: ${PETTALE_APPLE_AUDIENCE:com.pettale.app}
-    jwk-set-uri: ${PETTALE_APPLE_JWK_SET_URI:https://appleid.apple.com/auth/keys}
+    issuer: ${OREAMY_APPLE_ISSUER:https://appleid.apple.com}
+    audience: ${OREAMY_APPLE_AUDIENCE:com.oreamy.app}
+    jwk-set-uri: ${OREAMY_APPLE_JWK_SET_URI:https://appleid.apple.com/auth/keys}
+  app-store:
+    bundle-id: com.oreamy.app
+    app-apple-id: 6802677239
+    enable-online-certificate-checks: ${OREAMY_APPLE_CERTIFICATE_ONLINE_CHECKS:true}
   session:
-    issuer: ${PETTALE_SESSION_ISSUER:pettale-backend}
-    lifetime: ${PETTALE_SESSION_LIFETIME:P30D}
-    signing-key: ${PETTALE_SESSION_SIGNING_KEY:}
+    issuer: ${OREAMY_SESSION_ISSUER:oreamy-backend}
+    lifetime: ${OREAMY_SESSION_LIFETIME:P30D}
+    signing-key: ${OREAMY_SESSION_SIGNING_KEY:}
   ai:
-    free-monthly-request-limit: ${PETTALE_AI_FREE_MONTHLY_REQUEST_LIMIT:3}
-    premium-monthly-request-limit: ${PETTALE_AI_PREMIUM_MONTHLY_REQUEST_LIMIT:100}
-    extraction-model: ${PETTALE_EXTRACTION_MODEL:gpt-5-mini}
-    reasoning-effort: ${PETTALE_EXTRACTION_REASONING_EFFORT:low}
-    text-verbosity: ${PETTALE_EXTRACTION_TEXT_VERBOSITY:low}
-    reservation-timeout: ${PETTALE_AI_RESERVATION_TIMEOUT:PT2M}
-    provider-timeout: ${PETTALE_OPENAI_TIMEOUT:PT30S}
-    openai-api-key: ${PETTALE_OPENAI_API_KEY:}
-    openai-base-url: ${PETTALE_OPENAI_BASE_URL:https://api.openai.com}
+    free-monthly-request-limit: ${OREAMY_AI_FREE_MONTHLY_REQUEST_LIMIT:3}
+    premium-monthly-request-limit: ${OREAMY_AI_PREMIUM_MONTHLY_REQUEST_LIMIT:300}
+    extraction-model: ${OREAMY_EXTRACTION_MODEL:gpt-5-mini}
+    reasoning-effort: ${OREAMY_EXTRACTION_REASONING_EFFORT:low}
+    text-verbosity: ${OREAMY_EXTRACTION_TEXT_VERBOSITY:low}
+    reservation-timeout: ${OREAMY_AI_RESERVATION_TIMEOUT:PT2M}
+    provider-timeout: ${OREAMY_OPENAI_TIMEOUT:PT30S}
+    openai-api-key: ${OREAMY_OPENAI_API_KEY:}
+    openai-base-url: ${OREAMY_OPENAI_BASE_URL:https://api.openai.com}
   trial:
-    duration: ${PETTALE_TRIAL_DURATION:P30D}
+    duration: ${OREAMY_TRIAL_DURATION:P30D}
 management:
   endpoints:
     web:

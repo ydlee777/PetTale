@@ -1,24 +1,28 @@
 # ADR-004 — Pet Data Analytics and Privacy Boundary
 
+> **Product rename note (2026-08-18):** Pettale was renamed to Oreamy
+> before release. The proposed decision itself is unchanged; current
+> product references use Oreamy.
+
 - **Status:** Proposed
 - **Date:** 2026-08-17
 - **Related:** PRODUCT.md, TECHNOLOGY.md, ARCHITECTURE.md, ADR-002, ADR-003
 
 ## Context
 
-Pettale is designed as a long-term private memory of a pet's life. The current architecture separates private pet history from Pettale service-management data:
+Oreamy is designed as a long-term private memory of a pet's life. The current architecture separates private pet history from Oreamy service-management data:
 
 - **Private pet history:** SwiftData with Private CloudKit synchronization.
-- **Pettale backend:** service identity, authentication, subscription/trial state, AI usage, limits, AI gateway, and operational data.
+- **Oreamy backend:** service identity, authentication, subscription/trial state, AI usage, limits, AI gateway, and operational data.
 - The backend is not the authoritative store for Pet, PetRecord, PetEvent, transcript, photo, or diary history.
 
-This boundary is appropriate for V1. However, aggregated data across many pets could later help Pettale improve event extraction, understand product usage, build population-level statistics, and create useful comparison/intelligence features.
+This boundary is appropriate for V1. However, aggregated data across many pets could later help Oreamy improve event extraction, understand product usage, build population-level statistics, and create useful comparison/intelligence features.
 
 The architecture should therefore preserve individual privacy without permanently preventing carefully governed analytics.
 
 ## Decision
 
-Pettale will maintain a strict separation between **Private Pet History**, **Pettale Analytics Data**, and **Service/Operational Data**.
+Oreamy will maintain a strict separation between **Private Pet History**, **Oreamy Analytics Data**, and **Service/Operational Data**.
 
 ### 1. Private Pet History remains Apple-side authoritative data
 
@@ -43,13 +47,13 @@ For V1 this remains:
 
 **SwiftData → Private CloudKit**
 
-The Pettale backend must not become a duplicate authoritative pet-history database merely for future analytics convenience.
+The Oreamy backend must not become a duplicate authoritative pet-history database merely for future analytics convenience.
 
-### 2. Service/Operational Data may remain in the Pettale backend
+### 2. Service/Operational Data may remain in the Oreamy backend
 
 The backend may store data necessary to operate the commercial service, including:
 
-- Pettale service user identity
+- Oreamy service user identity
 - Authentication-related service data
 - Subscription status
 - Trial status
@@ -62,7 +66,7 @@ This data must remain separated from private pet-history content.
 
 ### 3. Future analytics data must be purpose-specific and minimized
 
-Pettale may introduce a separate analytics data boundary when there is a concrete product or business requirement.
+Oreamy may introduce a separate analytics data boundary when there is a concrete product or business requirement.
 
 Instead of copying complete histories, analytics should prefer narrowly scoped structured attributes such as:
 
@@ -80,7 +84,7 @@ Analytics records should avoid direct personal or pet identifiers unless an appr
 
 ### 4. Raw private content is not general analytics data
 
-The following must not be collected into general Pettale analytics merely because it could be useful later:
+The following must not be collected into general Oreamy analytics merely because it could be useful later:
 
 - Raw voice audio
 - Full transcripts
@@ -95,12 +99,12 @@ Collection of such content for AI/product improvement requires a separately appr
 
 ### 5. AI processing does not imply backend retention
 
-Pet data may transiently pass through the Pettale backend and an approved AI provider to perform a user-requested feature.
+Pet data may transiently pass through the Oreamy backend and an approved AI provider to perform a user-requested feature.
 
 ```text
 Approved transcript
         ↓
-Pettale AI Gateway
+Oreamy AI Gateway
         ↓
 AI Provider
         ↓
@@ -123,17 +127,17 @@ SwiftData + Private CloudKit
         │
         │ approved minimized analytics only
         ▼
-Pettale Analytics Boundary
+Oreamy Analytics Boundary
         │
         ▼
 Aggregated Product Intelligence
 ```
 
-A Pettale service account must not automatically cause the user's complete private pet history to be uploaded to Pettale servers.
+A Oreamy service account must not automatically cause the user's complete private pet history to be uploaded to Oreamy servers.
 
 ### 7. Aggregation is preferred over individual-history replication
 
-Where a product question can be answered using aggregated or derived data, Pettale should prefer that approach.
+Where a product question can be answered using aggregated or derived data, Oreamy should prefer that approach.
 
 Potential future examples:
 
@@ -147,9 +151,9 @@ These are future possibilities, not authorization to implement collection in V1.
 
 ### 8. AI training/improvement data requires a separate decision
 
-Using user transcripts, diary text, photos, or detailed histories to improve Pettale's AI is materially different from operational analytics.
+Using user transcripts, diary text, photos, or detailed histories to improve Oreamy's AI is materially different from operational analytics.
 
-Before implementing such a dataset, Pettale must separately decide:
+Before implementing such a dataset, Oreamy must separately decide:
 
 - Exact data collected
 - Purpose
@@ -200,7 +204,7 @@ Any future analytics implementation must follow:
 
 ### Positive
 
-- Preserves Pettale's privacy-first architecture.
+- Preserves Oreamy's privacy-first architecture.
 - Keeps private diary content under the user's Apple-side storage boundary.
 - Avoids unnecessary backend storage and infrastructure cost in V1.
 - Leaves room for future population-level product intelligence.
@@ -209,7 +213,7 @@ Any future analytics implementation must follow:
 
 ### Trade-offs
 
-- Pettale will not initially have a complete centralized dataset of pet histories.
+- Oreamy will not initially have a complete centralized dataset of pet histories.
 - Some future analytics features may require new consent, schemas, APIs, and pipelines.
 - Population-level intelligence cannot directly query all private CloudKit histories.
 - Future analytics must deliberately define which derived data may leave the device.
@@ -232,7 +236,7 @@ Rejected because raw free-form content contains substantially more private conte
 
 ## Future Decision Triggers
 
-Revisit this ADR when Pettale proposes:
+Revisit this ADR when Oreamy proposes:
 
 - Population-level pet statistics
 - Personalized comparison against other pets
@@ -247,4 +251,4 @@ Any such proposal must specify exact data flow, retention, privacy implications,
 
 ## Decision Summary
 
-**Private pet history remains Apple-side and authoritative. Pettale may later collect narrowly scoped, purpose-specific, privacy-preserving analytics data, but this ADR does not authorize replication of raw pet histories or use of private content for AI training. Any broader collection requires a separate explicit architectural and privacy decision.**
+**Private pet history remains Apple-side and authoritative. Oreamy may later collect narrowly scoped, purpose-specific, privacy-preserving analytics data, but this ADR does not authorize replication of raw pet histories or use of private content for AI training. Any broader collection requires a separate explicit architectural and privacy decision.**

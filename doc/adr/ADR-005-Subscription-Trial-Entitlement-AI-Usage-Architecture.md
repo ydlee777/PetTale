@@ -1,38 +1,43 @@
 # ADR-005 --- Subscription, Trial, Entitlement and AI Usage Architecture
 
+> **Product rename note (2026-08-18):** Pettale was renamed to Oreamy
+> before release. The decision itself is unchanged; current product
+> references and Apple identifiers use Oreamy.
+
 **Status:** Accepted\
 **Date:** 2026-08-17\
-**Decision Owners:** Pettale\
+**Amended:** 2026-08-18\
+**Decision Owners:** Oreamy\
 **Scope:** iOS V1 subscription, Premium trial, free/archive access,
 entitlement synchronization, and AI usage authorization
 
 ## 1. Context
 
-Pettale is a commercial consumer application whose core paid value is
+Oreamy is a commercial consumer application whose core paid value is
 the ability to quickly create structured pet-life records using:
 
-**Voice → on-device Speech-to-Text → Pettale AI extraction → Diary +
+**Voice → on-device Speech-to-Text → Oreamy AI extraction → Diary +
 structured events → long-term pet history**
 
 Private pet data remains in the Apple-side persistence architecture (Pet
 profiles, PetRecord, original transcript, diary text, PetEvent,
 weight/health history, Diary/Timeline, and derived local statistics).
 
-Pettale backend stores service-management data only: service identity,
+Oreamy backend stores service-management data only: service identity,
 authentication, AI usage, entitlement information, and
 subscription/trial state.
 
-Pet history must not be moved to the Pettale backend merely to support
+Pet history must not be moved to the Oreamy backend merely to support
 subscriptions.
 
 ## 2. Decision
 
-Pettale will use a three-layer authority model:
+Oreamy will use a three-layer authority model:
 
-**Apple StoreKit 2 → Pettale Backend → Pettale iOS App**
+**Apple StoreKit 2 → Oreamy Backend → Oreamy iOS App**
 
 -   **Apple** is authoritative for App Store subscription entitlement.
--   **Pettale Backend** is authoritative for service access, trial
+-   **Oreamy Backend** is authoritative for service access, trial
     state, AI allowance, and authorization of server-side AI operations.
 -   **iOS App** presents products/prices, initiates purchases, restores
     purchases, observes StoreKit entitlement, synchronizes entitlement
@@ -43,7 +48,7 @@ The iOS client is not the final authority for paid AI access.
 
 ## 3. V1 Commercial Plans
 
-Three service states:
+Backend service-access states:
 
 -   `PREMIUM_TRIAL`
 -   `PREMIUM`
@@ -51,27 +56,49 @@ Three service states:
 
 `FREE` also represents post-trial/post-subscription archive mode.
 
+The iOS V1 user-facing subscription presentation contract has exactly
+five states:
+
+-   `FREE_TRIAL`
+-   `FREE`
+-   `PREMIUM_MONTHLY`
+-   `PREMIUM_YEARLY`
+-   `PREMIUM_EXPIRING`
+
+`PREMIUM_EXPIRING` retains the current/previous paid product (Monthly or
+Yearly) and its verified expiration date. StoreKit verified entitlement
+and renewal information determine paid presentation state. A Oreamy
+backend trial must never be presented as a paid Premium subscription.
+
 ## 4. Premium Trial
 
-Pettale provides **30 days of Premium access**.
+Oreamy provides **30 days of Premium access**.
 
-The V1 Premium Trial is a **Pettale service trial**, not an App Store
+The V1 Premium Trial is a **Oreamy service trial**, not an App Store
 introductory subscription trial. Apple introductory offers may be
 evaluated later.
 
 ## 5. Trial Start
 
-The trial does not begin on install, launch, Pet creation, Sign in with
-Apple, or browsing.
+The trial begins when the Oreamy backend creates a new `ServiceUser`.
+It does not wait for the first successful AI-powered diary/event
+extraction. Install, launch, Pet creation, and browsing without service
+account creation do not start the trial.
 
-It begins on the **first successful AI-powered diary/event extraction**
-accepted as a successful Pettale AI operation.
+For compatibility with accounts created before this decision:
 
-Failed AI requests do not start the trial.
+-   Existing users with non-null `trial_started_at` and
+    `trial_expires_at` retain those values exactly.
+-   Existing users with both trial dates null are backfilled with
+    `trial_started_at = service_user.created_at` and
+    `trial_expires_at = service_user.created_at + 30 days`.
+-   Existing accounts are never reset or extended. An account older
+    than 30 days may therefore become `FREE` immediately after the
+    compatibility migration.
 
 ## 6. Trial Authority
 
-Trial state is authoritative in the Pettale backend. It should persist
+Trial state is authoritative in the Oreamy backend. It should persist
 sufficient information such as `trial_started_at` and
 `trial_expires_at`, or an equivalent entitlement model.
 
@@ -80,9 +107,9 @@ date, or device-local state.
 
 ## 7. Trial Eligibility
 
-One Pettale Premium Trial per `ServiceUser`.
+One Oreamy Premium Trial per `ServiceUser`.
 
-Reinstalling Pettale or changing iPhones must not create a new trial for
+Reinstalling Oreamy or changing iPhones must not create a new trial for
 the same service identity.
 
 ## 8. Trial Access
@@ -99,13 +126,13 @@ Initial target pricing:
 -   Monthly: **US\$4.99/month**
 -   Annual: **approximately US\$47.99/year**
 
-Final storefront prices are configured in App Store Connect. Pettale
+Final storefront prices are configured in App Store Connect. Oreamy
 must display StoreKit-provided localized pricing rather than hard-coded
 USD prices.
 
 ## 10. StoreKit
 
-Pettale V1 uses **StoreKit 2** and native Apple frameworks.
+Oreamy V1 uses **StoreKit 2** and native Apple frameworks.
 
 StoreKit handles product loading, purchase flow, on-device transaction
 verification, entitlement observation, restoration, and
@@ -117,10 +144,18 @@ No third-party subscription SDK is introduced for V1.
 
 Monthly and annual Premium products belong to one subscription group:
 
--   Pettale Premium Monthly
--   Pettale Premium Annual
+-   Oreamy Premium Monthly
+-   Oreamy Premium Annual
 
 Both grant the same Premium entitlement.
+
+The only V1 product identifiers eligible for paid Premium authority
+are:
+
+-   `com.oreamy.app.premium.monthly`
+-   `com.oreamy.app.premium.annual`
+
+The backend rejects every unknown product identifier.
 
 ## 12. Premium Entitlement
 
@@ -129,20 +164,99 @@ An active verified Premium subscription grants `PREMIUM` service access.
 Product identifiers remain configuration constants, not user-facing
 text.
 
+During Step 8B, local verified StoreKit entitlement is authoritative
+only for iOS paid-subscription presentation. It does not by itself grant
+backend Premium service access. Actual Apple paid entitlement to Oreamy
+backend synchronization and server-side verification are implemented
+through Step 8C. Until the relevant Step 8C slice exists and verifies
+Apple evidence, neither the client nor the backend may pretend that
+local StoreKit state has established backend Premium authority.
+
 ## 13. Server-Side Subscription Verification
 
 The backend must never trust client assertions such as
 `{ "premium": true }`.
 
-Premium authority must be based on verified Apple subscription evidence
-and/or supported App Store server-side transaction mechanisms.
-
-The client may forward entitlement evidence but cannot self-assert
+Apple-signed StoreKit transaction JWS is the V1 paid-entitlement
+evidence. The client may forward this evidence but cannot self-assert
 Premium status.
+
+The backend verifies Apple-signed evidence using Apple's supported App
+Store Server verification/library mechanisms. The approved V1 server
+direction is:
+
+-   App Store Server Library for signed-data verification;
+-   App Store Server API for authoritative subscription
+    reconciliation; and
+-   App Store Server Notifications V2 for subscription lifecycle
+    updates.
+
+### 13.1 Account Ownership
+
+Every new Oreamy purchase supplies:
+
+`appAccountToken = authenticated Oreamy ServiceUser.id`
+
+`ServiceUser.id` is a UUID. The backend requires the verified
+transaction's `appAccountToken` to equal the authenticated
+`ServiceUser.id`. A missing or mismatched token is rejected and cannot
+grant backend Premium.
+
+### 13.2 Transaction Ownership and Idempotency
+
+An Apple `originalTransactionId` belongs to exactly one `ServiceUser`.
+The same `originalTransactionId` cannot grant Premium to another Oreamy
+account. Repeated synchronization of the same verified transaction is
+idempotent and must not create duplicate subscription authority or AI
+usage.
+
+### 13.3 Tokenless Transactions
+
+Transactions without `appAccountToken` do not automatically grant
+backend Premium. Oreamy V1 does not provide an automatic legacy-claim
+mechanism.
+
+Current pre-release Xcode StoreKit and Sandbox development transactions
+are test data and require no production ownership migration.
+
+### 13.4 Entitlement Lifecycle and Precedence
+
+Backend effective service access is resolved in this order:
+
+1.  valid Apple-verified paid entitlement → `PREMIUM`, 300 AI
+    extractions per UTC calendar month;
+2.  otherwise, valid Oreamy trial → `PREMIUM_TRIAL`, 300 per month;
+3.  otherwise → `FREE`, 3 per month.
+
+Cancellation of auto-renewal does not immediately remove Premium.
+Premium remains valid until Apple's verified expiration. Expired or
+revoked entitlement does not grant paid Premium.
+
+### 13.5 Apple Service Outage Policy
+
+If the backend already holds an Apple-verified entitlement whose last
+verified expiration remains in the future, a temporary Apple API outage
+does not immediately downgrade the user.
+
+The backend must never extend Premium beyond the last Apple-verified
+expiration solely because Apple is unavailable.
+
+### 13.6 Environment Policy
+
+-   Xcode local StoreKit configuration is for local iOS UI and state
+    testing only. It is not production backend Premium authority.
+-   Apple Sandbox is used for backend Apple integration testing.
+-   Production uses Apple's production verification environment.
+
+Oreamy does not add production exceptions that allow Xcode-local
+transactions to establish backend Premium authority.
+
+Apple private keys and verification credentials are backend-only
+secrets. They must never be embedded in iOS or committed to Git.
 
 ## 14. AI Authorization
 
-Every server-side paid AI operation is authorized by the Pettale
+Every server-side paid AI operation is authorized by the Oreamy
 backend:
 
 **Authenticated ServiceUser → resolve service access →
@@ -163,7 +277,8 @@ Existing pet history remains available.
 FREE users retain access to:
 
 -   Pet profiles
--   existing Diary and diary text
+-   Pet management
+-   existing Diary, diary text, and photos
 -   original transcripts
 -   structured events
 -   Weight Trend
@@ -182,7 +297,7 @@ Initial V1 policy:
 
 Configurable, e.g.:
 
-`PETTALE_AI_FREE_MONTHLY_REQUEST_LIMIT=3`
+`OREAMY_AI_FREE_MONTHLY_REQUEST_LIMIT=3`
 
 The value is product policy, not an architectural constant.
 
@@ -190,14 +305,17 @@ The value is product policy, not an architectural constant.
 
 Initial V1 fair-use guard:
 
-**100 AI extraction operations per UTC calendar month**
+**300 AI extraction operations per UTC calendar month**
 
 Configurable, e.g.:
 
-`PETTALE_AI_PREMIUM_MONTHLY_REQUEST_LIMIT=100`
+`OREAMY_AI_PREMIUM_MONTHLY_REQUEST_LIMIT=300`
 
-This is a cost/abuse guard rather than a product promise that Premium is
-limited to exactly 100 records forever.
+The same 300-request allowance applies to an active Oreamy Premium
+Trial. Once Step 8C server entitlement synchronization exists, valid
+Monthly Premium, valid Yearly Premium, and `PREMIUM_EXPIRING` before its
+verified expiration use this allowance. This remains a configurable
+cost/abuse guard rather than a permanent product promise.
 
 ## 19. Usage Accounting
 
@@ -221,8 +339,8 @@ classified as failed under existing policy.
 
 Development may override limits with configuration, e.g.:
 
--   `PETTALE_AI_FREE_MONTHLY_REQUEST_LIMIT=1000`
--   `PETTALE_AI_PREMIUM_MONTHLY_REQUEST_LIMIT=1000`
+-   `OREAMY_AI_FREE_MONTHLY_REQUEST_LIMIT=1000`
+-   `OREAMY_AI_PREMIUM_MONTHLY_REQUEST_LIMIT=1000`
 
 Do not delete usage rows, bypass authentication, or disable quota
 enforcement in code.
@@ -236,17 +354,20 @@ Existing local data remains untouched and requires no data migration.
 ## 23. Subscription Cancellation
 
 Cancellation of auto-renewal does not immediately remove Premium. Access
-remains until Apple's verified entitlement expiration.
+remains until Apple's verified entitlement expiration. The iOS paid
+presentation state is `PREMIUM_EXPIRING`, retaining the Monthly or Yearly
+product and verified expiration date. After expiration, presentation
+falls back to backend `FREE_TRIAL` when still valid, otherwise `FREE`.
 
 ## 24. Billing Problems
 
 Grace period and billing retry behavior follow verified Apple
-subscription status. Pettale does not invent separate billing-state
+subscription status. Oreamy does not invent separate billing-state
 semantics.
 
 ## 25. Restore Purchases
 
-Pettale provides a standard **Restore Purchases** action.
+Oreamy provides a standard **Restore Purchases** action.
 
 Restoration refreshes verified entitlement and synchronizes service
 access with the backend.
@@ -258,7 +379,7 @@ Recovery paths remain separate:
 -   Pet history → SwiftData/private CloudKit
 -   Service identity → Sign in with Apple
 -   Premium entitlement → Apple subscription entitlement/restore
--   Trial state → Pettale backend
+-   Trial state → Oreamy backend
 
 ## 27. Authentication and Subscription
 
@@ -266,7 +387,7 @@ Local private history can be browsed without a functioning backend
 session.
 
 Server-side AI and subscription synchronization require authenticated
-Pettale service identity.
+Oreamy service identity.
 
 ## 28. Offline Behavior
 
@@ -295,7 +416,7 @@ Browsing existing history must not trigger a paywall.
 
 Do not imply that user data is locked.
 
-Communicate that Pettale history remains available and Premium provides
+Communicate that Oreamy history remains available and Premium provides
 more AI-powered recordings.
 
 ## 31. Free Allowance Exhaustion UX
@@ -322,7 +443,7 @@ Never assume USD formatting for all users.
 ## 34. Subscription Data in PostgreSQL
 
 Backend may retain only service-management data necessary for
-entitlement operation, potentially including:
+entitlement operation, including where required:
 
 -   ServiceUser association
 -   trial start/expiration
@@ -332,6 +453,8 @@ entitlement operation, potentially including:
 -   last synchronization timestamp
 -   Apple transaction/original transaction identifiers where
     operationally required
+-   verified `appAccountToken` ownership association
+-   Apple environment and verification status
 
 Minimize retained App Store data.
 
@@ -366,20 +489,20 @@ It is not authoritative for server-side AI access.
 
   Apple subscription purchase         Apple / StoreKit
 
-  Verified Premium entitlement        Apple evidence verified for Pettale
+  Verified Premium entitlement        Apple evidence verified for Oreamy
                                       service
 
-  Pettale trial                       Pettale backend
+  Oreamy trial                       Oreamy backend
 
-  AI usage count                      Pettale backend `ai_usage`
+  AI usage count                      Oreamy backend `ai_usage`
 
-  AI operation authorization          Pettale backend
+  AI operation authorization          Oreamy backend
 
   Local history browsing              iOS local/private Apple data
 
   Localized subscription price        StoreKit
 
-  OpenAI credentials                  Pettale backend
+  OpenAI credentials                  Oreamy backend
   -----------------------------------------------------------------------
 
 ## 39. V1 Access Matrix
@@ -401,9 +524,13 @@ It is not authoritative for server-side AI access.
   Existing Record                   Yes                Yes                Yes
   Summary
 
+  Existing photos                   Yes                Yes                Yes
+
+  Pet management                    Yes                Yes                Yes
+
   AI voice diary      Premium allowance  Premium allowance     Free allowance
 
-  Initial monthly AI                100                100                  3
+  Initial monthly AI                300                300                  3
   allowance
 
   Purchase/upgrade                  Yes             Manage                Yes
@@ -416,7 +543,7 @@ constants.
 
 ## 40. Why Not Lock Historical Records?
 
-Pettale's long-term value comes from years of personal pet history.
+Oreamy's long-term value comes from years of personal pet history.
 
 Locking existing records after subscription expiration would reduce
 trust, discourage retention, and conflict with the private/local
@@ -428,7 +555,7 @@ services, not access to the user's own existing history.
 ## 41. Why Provide Free AI Usage?
 
 A small FREE allowance supports continued engagement, reminds users of
-Pettale's value, creates a path back to Premium, and reduces post-trial
+Oreamy's value, creates a path back to Premium, and reduces post-trial
 uninstall pressure.
 
 The exact allowance should be revisited using real conversion,
@@ -443,7 +570,7 @@ retention, and cost data.
 -   Subscription expiration cannot strand user history.
 -   Trial cannot be reset by reinstalling.
 -   Server-side AI cost remains controllable.
--   Free users retain a reason to keep Pettale installed.
+-   Free users retain a reason to keep Oreamy installed.
 -   StoreKit remains the source of localized pricing and purchase state.
 -   Policy values can evolve without redesigning the architecture.
 
@@ -461,8 +588,8 @@ retention, and cost data.
 
 ### App Store introductory free trial only
 
-Rejected for V1 because Pettale wants the 30-day product trial to begin
-on first successful AI use.
+Rejected for V1 because Oreamy uses a backend-controlled 30-day product
+trial beginning when the `ServiceUser` is created.
 
 ### Device-local trial
 
@@ -485,7 +612,7 @@ Rejected because recurring provider costs and abuse must be controlled.
 
 ### Third-party subscription SDK
 
-Not selected for V1. StoreKit 2 plus Pettale backend is sufficient.
+Not selected for V1. StoreKit 2 plus Oreamy backend is sufficient.
 
 ## 44. Implementation Guidance
 
@@ -494,23 +621,39 @@ Implement in small independently testable steps:
 1.  Backend trial/service-access domain.
 2.  Backend configurable plan-aware AI allowance.
 3.  StoreKit 2 product and entitlement layer on iOS.
-4.  Server-side Apple entitlement verification/synchronization.
-5.  Paywall and subscription-management UI.
-6.  Restore purchase.
-7.  Trial/free/premium UX.
-8.  StoreKit/App Store sandbox end-to-end verification.
+4.  Step 8C-1: `appAccountToken` purchase ownership, backend entitlement
+    model, authenticated synchronization boundary, Apple-signed JWS
+    verification foundation, and idempotency/security tests.
+5.  Step 8C-2: App Store Server API reconciliation, App Store Server
+    Notifications V2, production credentials/configuration, and
+    lifecycle reconciliation.
+6.  Paywall and subscription-management UI.
+7.  Restore purchase.
+8.  Trial/free/premium UX.
+9.  StoreKit/App Store sandbox end-to-end verification.
 
 Do not implement the entire subscription system in one large step.
+If an Apple credential is required before a slice can be implemented
+correctly, stop rather than inventing credentials or weakening
+verification.
 
 ## 45. Decision Status
 
-**Proposed**
+**Accepted**
 
-Move to **Accepted** before implementation after confirming:
+The accepted V1 policy is:
 
--   Monthly/annual product identifiers
--   Final initial FREE allowance
--   Final initial Premium fair-use limit
--   First successful AI extraction as the exact trial activation
-    boundary
--   Apple entitlement verification implementation approach
+-   Monthly/annual paid products remain in one StoreKit subscription
+    group.
+-   FREE allowance is 3 AI extractions per UTC calendar month.
+-   Premium Trial and verified paid Premium allowance is 300 AI
+    extractions per UTC calendar month.
+-   `ServiceUser` creation is the exact trial activation boundary.
+-   StoreKit verified entitlement and renewal state drive local paid
+    presentation.
+-   Apple-signed StoreKit transaction JWS, verified by the backend and
+    bound to the authenticated `ServiceUser` through `appAccountToken`,
+    is the V1 paid-entitlement evidence.
+-   App Store Server API reconciliation and App Store Server
+    Notifications V2 maintain authoritative paid-entitlement lifecycle
+    state.

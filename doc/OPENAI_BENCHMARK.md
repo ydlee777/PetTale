@@ -1,6 +1,6 @@
 # OpenAI extraction benchmark
 
-Real provider calls are manual and never part of the standard test suite. Start the backend with a development PostgreSQL database, a Pettale signing key, `PETTALE_OPENAI_API_KEY`, and the configured `PETTALE_EXTRACTION_MODEL` (default `gpt-5-mini`). Obtain a valid Pettale bearer session through Sign in with Apple, then exercise `POST /api/v1/ai/extractions` from the iOS Transcript Review flow or an HTTPS client. Never paste keys into source files or benchmark results.
+Real provider calls are manual and never part of the standard test suite. Start the backend with a development PostgreSQL database, a Oreamy signing key, `OREAMY_OPENAI_API_KEY`, and the configured `OREAMY_EXTRACTION_MODEL` (default `gpt-5-mini`). Obtain a valid Oreamy bearer session through Sign in with Apple, then exercise `POST /api/v1/ai/extractions` from the iOS Transcript Review flow or an HTTPS client. Never paste keys into source files or benchmark results.
 
 For each case record configured/actual model, returned drafts, correct and incorrect fields, approximate end-to-end provider latency, input/output tokens from the corresponding safe `ai_usage` row, provider request ID when available, usage lifecycle result, and any hallucination or omission. Do not record the transcript or provider response body in PostgreSQL or application logs.
 

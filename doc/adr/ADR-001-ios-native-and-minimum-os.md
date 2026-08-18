@@ -1,25 +1,29 @@
 # ADR-001: iOS Native V1 and Minimum OS Policy
 
+> **Product rename note (2026-08-18):** Pettale was renamed to Oreamy
+> before release. The decision itself is unchanged; current product
+> references use Oreamy.
+
 - **Status:** Accepted
 - **Date:** 2026-08-16
-- **Decision Owners:** Pettale
-- **Applies To:** Pettale V1
+- **Decision Owners:** Oreamy
+- **Applies To:** Oreamy V1
 
 ## Context
 
-Pettale V1 is an iPhone application whose core workflow is:
+Oreamy V1 is an iPhone application whose core workflow is:
 
 **Speak → Speech-to-text → AI extraction → Structured pet events → Diary/history**
 
 The product should be fast, simple, privacy-conscious, and economical to operate. Apple-native technologies provide the most direct implementation path for the initial iPhone-only release.
 
-Speech-to-text is a core dependency. Pettale intends to use Apple's modern Speech framework and a `SpeechAnalyzer`-based implementation rather than maintaining multiple speech stacks merely to support older iOS versions.
+Speech-to-text is a core dependency. Oreamy intends to use Apple's modern Speech framework and a `SpeechAnalyzer`-based implementation rather than maintaining multiple speech stacks merely to support older iOS versions.
 
 Android may be developed later, but hypothetical Android requirements must not complicate the iOS V1.
 
 ## Decision
 
-Pettale V1 will be implemented as a **native iPhone application** using:
+Oreamy V1 will be implemented as a **native iPhone application** using:
 
 - Swift
 - SwiftUI
@@ -31,7 +35,7 @@ The minimum deployment target will be the **minimum iOS version that supports th
 
 Before the Xcode project deployment target is finalized, the implementation team must verify the exact required iOS version against the current Xcode SDK and Apple documentation.
 
-Pettale V1 will not implement a second legacy speech-to-text architecture solely to support older iOS versions.
+Oreamy V1 will not implement a second legacy speech-to-text architecture solely to support older iOS versions.
 
 Android is explicitly outside V1 scope.
 
@@ -42,7 +46,7 @@ If Android is added later, the preferred direction is a separate native Android 
 This decision:
 
 - Keeps V1 implementation simple.
-- Allows Pettale to use modern Apple speech APIs.
+- Allows Oreamy to use modern Apple speech APIs.
 - Reduces compatibility code and testing.
 - Maximizes integration with iOS.
 - Supports rapid development with Swift/SwiftUI.
@@ -62,7 +66,7 @@ Future Android compatibility will be achieved through platform-independent servi
 
 ### Negative / Trade-offs
 
-- Users on unsupported older iOS versions cannot install Pettale.
+- Users on unsupported older iOS versions cannot install Oreamy.
 - A future Android application will require separate client implementation.
 - Exact minimum iOS version becomes dependent on the selected Speech framework APIs.
 

@@ -1,15 +1,14 @@
-# Pettale — Product Baseline
+# Oreamy — Product Baseline
 
 **Status:** V1 Baseline  
 **Purpose:** Product reference for developers and Codex.
 
 ## 1. Vision
-**Pettale = Pet + Tale**  
 **Core message:** *Every pet has a tale.*
 
-Pettale is an AI-powered pet life diary. The core experience is:
+Oreamy is an AI-powered pet life diary. The core experience is:
 
-**Speak → AI understands → Events are organized → Diary is created → Pettale remembers**
+**Speak → AI understands → Events are organized → Diary is created → Oreamy remembers**
 
 V1 is an iPhone-only consumer app. A normal daily record should take less than 10 seconds.
 
@@ -17,7 +16,7 @@ V1 is an iPhone-only consumer app. A normal daily record should take less than 1
 1. Select/identify pet.
 2. Tap Record and speak naturally.
 3. Apple speech-to-text produces a transcript.
-4. Pettale AI extracts and classifies one or more events.
+4. Oreamy AI extracts and classifies one or more events.
 5. User quickly reviews/corrects the result.
 6. Save.
 7. Diary, history, and statistics update automatically.
@@ -80,7 +79,7 @@ Initial hypothesis:
 Do not promise technically unlimited AI usage.
 
 ## 7. Advertising Policy
-Pettale must be architected so ads can later be enabled in Free Mode, but an advertising SDK/provider is **not required for initial V1**.
+Oreamy must be architected so ads can later be enabled in Free Mode, but an advertising SDK/provider is **not required for initial V1**.
 
 - Trial: no ads
 - Premium: no ads
@@ -90,7 +89,7 @@ Pettale must be architected so ads can later be enabled in Free Mode, but an adv
 ## 8. Privacy
 Pet records, transcripts, photos, and diary information are private user data.
 
-- Private pet history is not permanently stored in the Pettale service backend by default.
+- Private pet history is not permanently stored in the Oreamy service backend by default.
 - Prefer SwiftData + private iCloud/CloudKit.
 - Audio is temporary and should be deleted after successful transcription unless explicitly needed.
 - Photos are not automatically sent to an AI model in V1.
@@ -114,7 +113,7 @@ Unless explicitly approved:
 - Android app
 - Consumer web app
 - Generic chatbot
-- Ask Pettale historical Q&A
+- Ask Oreamy historical Q&A
 - Automatic veterinary diagnosis
 - Automatic photo diagnosis
 - Social network
@@ -124,9 +123,9 @@ Unless explicitly approved:
 ## 11. Future Direction
 Android may later use the same API contracts, schemas, canonical codes, and business rules.
 
-Potential later feature: **Ask Pettale**, for questions based on historical pet records.
+Potential later feature: **Ask Oreamy**, for questions based on historical pet records.
 
 ## 12. V1 Decision Rule
-> **Does this help validate whether users will repeatedly use and pay for Pettale?**
+> **Does this help validate whether users will repeatedly use and pay for Oreamy?**
 
 If not, strongly consider postponing it.

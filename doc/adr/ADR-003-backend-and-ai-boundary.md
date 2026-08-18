@@ -1,17 +1,21 @@
 # ADR-003: Backend Architecture and AI Boundary
 
+> **Product rename note (2026-08-18):** Pettale was renamed to Oreamy
+> before release. The decision itself is unchanged; current product
+> references use Oreamy.
+
 - **Status:** Accepted
 - **Date:** 2026-08-16
-- **Decision Owners:** Pettale
-- **Applies To:** Pettale V1
+- **Decision Owners:** Oreamy
+- **Applies To:** Oreamy V1
 
 ## Context
 
-Pettale needs a server-side component for functions that should not live exclusively on the iPhone.
+Oreamy needs a server-side component for functions that should not live exclusively on the iPhone.
 
 These include:
 
-- Pettale service identity
+- Oreamy service identity
 - Sign in with Apple integration
 - Trial/subscription status
 - Subscription verification where required
@@ -23,13 +27,13 @@ These include:
 
 The backend does not need to store the user's complete private pet diary.
 
-Pettale is initially a small commercial consumer application, so the backend should remain operationally simple and cost-conscious.
+Oreamy is initially a small commercial consumer application, so the backend should remain operationally simple and cost-conscious.
 
 External AI API credentials must never be embedded in the iOS application.
 
 ## Decision
 
-Pettale V1 backend will use:
+Oreamy V1 backend will use:
 
 - **Java 21**
 - **Spring Boot**
@@ -43,7 +47,7 @@ The backend will be implemented as a **modular monolith**.
 
 It will not be split into microservices for V1.
 
-PostgreSQL will contain Pettale service-management data such as:
+PostgreSQL will contain Oreamy service-management data such as:
 
 - User/service identity
 - Sign in with Apple identity references
@@ -57,16 +61,16 @@ Private pet history remains governed by ADR-002.
 
 ## AI Gateway
 
-All external AI calls requiring private server credentials will pass through the Pettale backend.
+All external AI calls requiring private server credentials will pass through the Oreamy backend.
 
 Architecture:
 
 ```text
-Pettale iOS
+Oreamy iOS
      |
      | HTTPS
      v
-Pettale Backend
+Oreamy Backend
      |
      | Server-only AI credential
      v
@@ -83,10 +87,10 @@ GPT-5 mini is the initial candidate for extraction/classification benchmarking, 
 
 Model selection must be server-configurable, for example:
 
-- `PETTALE_EXTRACTION_MODEL`
-- `PETTALE_SUMMARY_MODEL`
+- `OREAMY_EXTRACTION_MODEL`
+- `OREAMY_SUMMARY_MODEL`
 
-This allows Pettale to change models based on:
+This allows Oreamy to change models based on:
 
 - Quality
 - Latency
@@ -180,7 +184,7 @@ A modular monolith provides sufficient separation without distributed-system com
 ### Negative / Trade-offs
 
 - Spring Boot has a larger runtime footprint than some lightweight alternatives.
-- Pettale must operate a backend even though private diary storage is primarily Apple-side.
+- Oreamy must operate a backend even though private diary storage is primarily Apple-side.
 - Subscription and AI gateway availability become service dependencies for premium AI operations.
 
 ## Security and Privacy Rules

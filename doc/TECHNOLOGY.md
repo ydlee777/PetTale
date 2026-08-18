@@ -1,4 +1,4 @@
-# Pettale — Technology Baseline
+# Oreamy — Technology Baseline
 
 **Status:** V1 Baseline  
 **Purpose:** Technology reference for developers and Codex.
@@ -46,7 +46,7 @@ Primary path:
 
 **Microphone → AVFoundation → Apple SpeechAnalyzer → Transcript**
 
-Raw audio should not normally be uploaded to Pettale/OpenAI.
+Raw audio should not normally be uploaded to Oreamy/OpenAI.
 
 Benefits:
 - Lower recurring cost
@@ -57,7 +57,7 @@ Benefits:
 English and Korean recognition quality must be tested on real devices. A cloud transcription fallback is a later decision only if needed.
 
 ## 5. AI
-All OpenAI calls pass through the Pettale backend. Never embed private AI API keys in the iOS app.
+All OpenAI calls pass through the Oreamy backend. Never embed private AI API keys in the iOS app.
 
 AI responsibilities:
 - Extraction
@@ -66,8 +66,8 @@ AI responsibilities:
 - Weekly/monthly narrative summaries
 
 Start extraction benchmarking with **GPT-5 mini**, but keep models server-configurable, e.g.:
-- `PETTALE_EXTRACTION_MODEL`
-- `PETTALE_SUMMARY_MODEL`
+- `OREAMY_EXTRACTION_MODEL`
+- `OREAMY_SUMMARY_MODEL`
 
 Use versioned Structured Outputs / JSON Schema for extraction.
 

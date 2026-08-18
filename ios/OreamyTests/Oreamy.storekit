@@ -1,0 +1,117 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "3EBD0BE4-71CE-4C01-9838-DB4B3DBBC0D7",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "C2A58F92-CA9D-44DF-B78C-F01DBEE795E1",
+      "localizations" : [
+        {
+          "description" : "More AI-powered recordings while existing history stays available.",
+          "displayName" : "Oreamy Premium",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "AI 기록을 더 많이 이용하고 기존 기록은 계속 보관하세요.",
+          "displayName" : "Oreamy 프리미엄",
+          "locale" : "ko"
+        }
+      ],
+      "name" : "Oreamy Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "4.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "E493D428-4498-4E68-8E35-27E131938E2D",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Oreamy Premium, billed monthly.",
+              "displayName" : "Oreamy Premium Monthly",
+              "locale" : "en_US"
+            },
+            {
+              "description" : "매월 결제되는 Oreamy 프리미엄입니다.",
+              "displayName" : "Oreamy 프리미엄 월간",
+              "locale" : "ko"
+            }
+          ],
+          "productID" : "com.oreamy.app.premium.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Oreamy Premium Monthly",
+          "subscriptionGroupID" : "C2A58F92-CA9D-44DF-B78C-F01DBEE795E1",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "47.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "1D87D7AE-4DA9-48DE-AF48-F12A7E15C630",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Oreamy Premium, billed annually.",
+              "displayName" : "Oreamy Premium Annual",
+              "locale" : "en_US"
+            },
+            {
+              "description" : "매년 결제되는 Oreamy 프리미엄입니다.",
+              "displayName" : "Oreamy 프리미엄 연간",
+              "locale" : "ko"
+            }
+          ],
+          "productID" : "com.oreamy.app.premium.annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Oreamy Premium Annual",
+          "subscriptionGroupID" : "C2A58F92-CA9D-44DF-B78C-F01DBEE795E1",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

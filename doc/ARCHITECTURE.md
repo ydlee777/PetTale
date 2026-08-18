@@ -1,15 +1,15 @@
-# Pettale — V1 Architecture Baseline
+# Oreamy — V1 Architecture Baseline
 
 **Status:** V1 Baseline  
 **Purpose:** Define system boundaries, data ownership, runtime flow, and implementation rules.
 
 ## 1. Goals
-Pettale V1 should be simple, fast, privacy-preserving, low-cost, native to iPhone, and maintainable with AI coding agents.
+Oreamy V1 should be simple, fast, privacy-preserving, low-cost, native to iPhone, and maintainable with AI coding agents.
 
 ## 2. High-Level Architecture
 
 ```text
-                    Pettale iOS
+                    Oreamy iOS
              Swift / SwiftUI / SwiftData
                         |
        +----------------+----------------+
@@ -19,7 +19,7 @@ Pettale V1 should be simple, fast, privacy-preserving, low-cost, native to iPhon
        |
        | transcript
        v
-                 Pettale Backend
+                 Oreamy Backend
               Java 21 / Spring Boot
                 Modular Monolith
                         |
@@ -57,7 +57,7 @@ Private pet data belongs in **SwiftData + private iCloud/CloudKit**:
 - Health/medication/vet history
 - Photos/attachments
 
-**Rule:** The Pettale backend is not the permanent source of truth for the user's private pet diary.
+**Rule:** The Oreamy backend is not the permanent source of truth for the user's private pet diary.
 
 Changing iPhone should not cause loss of history when the user's Apple/iCloud environment supports restoration/synchronization.
 
@@ -99,7 +99,7 @@ Transcript
   ↓
 Delete temporary audio after successful transcription
   ↓
-HTTPS → Pettale Backend
+HTTPS → Oreamy Backend
   ↓
 Check identity / subscription / AI quota
   ↓
@@ -122,7 +122,7 @@ Diary/statistics refresh
 iPhone
    | HTTPS
    v
-Pettale Backend
+Oreamy Backend
    | server-only credential
    v
 OpenAI API
@@ -225,7 +225,7 @@ Keep module boundaries clear without unnecessary infrastructure.
 Future Android may be a separate native Kotlin/Jetpack Compose app.
 
 Shared platform-independent contracts:
-- Pettale REST API
+- Oreamy REST API
 - AI/event JSON schemas
 - Canonical codes
 - Business rules
@@ -235,7 +235,7 @@ Do not compromise iOS V1 to share UI code.
 ## 16. Architecture Rules for Codex
 1. Inspect existing code and ADRs before changing architecture.
 2. Reuse existing functionality.
-3. Keep private pet history out of the Pettale backend unless an ADR explicitly changes the rule.
+3. Keep private pet history out of the Oreamy backend unless an ADR explicitly changes the rule.
 4. Never put server API secrets in the iOS app.
 5. Keep raw audio temporary by default.
 6. Keep AI model selection server-configurable.
