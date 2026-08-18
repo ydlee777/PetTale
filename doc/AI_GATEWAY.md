@@ -1,6 +1,6 @@
 # AI gateway and usage control
 
-Pettale's backend owns the AI provider boundary. The iOS app must authenticate with a Pettale bearer JWT and must never contain or call an AI provider with a private provider credential.
+Oreamy's backend owns the AI provider boundary. The iOS app must authenticate with a Oreamy bearer JWT and must never contain or call an AI provider with a private provider credential.
 
 ## Boundary and lifecycle
 
@@ -12,33 +12,33 @@ An `EVENT_EXTRACTION` attempt is reserved before provider invocation. `RESERVED`
 
 ## Quota semantics
 
-The V1 policy allows 3 FREE requests and 100 PREMIUM_TRIAL/PREMIUM requests per ServiceUser and operation per UTC calendar month. `PETTALE_AI_FREE_MONTHLY_REQUEST_LIMIT` and `PETTALE_AI_PREMIUM_MONTHLY_REQUEST_LIMIT` override these defaults. A never-started, trial-eligible user receives the Premium allowance so the first successful extraction can activate the trial. Month windows are half-open intervals from 00:00:00 UTC on the first day through, but excluding, the first day of the next month.
+The V1 policy allows 3 FREE requests and 300 PREMIUM_TRIAL/PREMIUM requests per ServiceUser and operation per UTC calendar month. `OREAMY_AI_FREE_MONTHLY_REQUEST_LIMIT` and `OREAMY_AI_PREMIUM_MONTHLY_REQUEST_LIMIT` override these defaults. A new ServiceUser receives trial dates at account creation; AI success or failure does not activate or modify the trial. Month windows are half-open intervals from 00:00:00 UTC on the first day through, but excluding, the first day of the next month.
 
 Reservation locks the caller's `service_user` row in the PostgreSQL transaction, resolves service access, counts current `RESERVED` and `SUCCEEDED` rows, and inserts only when below that plan's limit. This serializes concurrent reservations for one user without Redis or distributed locking.
 
-After provider output passes Pettale validation, the `SUCCEEDED` transition and first trial activation occur in one transaction under the same user-row lock. Failure paths leave trial dates null. Later successes cannot reset or extend an existing trial. Trial state is derived with the backend `Clock`; the exact expiration instant resolves to FREE without a scheduled mutation.
+After provider output passes Oreamy validation, the `SUCCEEDED` transition and first trial activation occur in one transaction under the same user-row lock. Failure paths leave trial dates null. Later successes cannot reset or extend an existing trial. Trial state is derived with the backend `Clock`; the exact expiration instant resolves to FREE without a scheduled mutation.
 
-Before counting, reservations older than `PETTALE_AI_RESERVATION_TIMEOUT` (default two minutes) are deterministically finalized as `FAILED / STALE_RESERVATION` under the same user lock. This recovers process interruption without allowing immediate abandoned-request retries. Provider HTTP work is bounded by `PETTALE_OPENAI_TIMEOUT` (default 30 seconds).
+Before counting, reservations older than `OREAMY_AI_RESERVATION_TIMEOUT` (default two minutes) are deterministically finalized as `FAILED / STALE_RESERVATION` under the same user lock. This recovers process interruption without allowing immediate abandoned-request retries. Provider HTTP work is bounded by `OREAMY_OPENAI_TIMEOUT` (default 30 seconds).
 
 ## Configuration and privacy
 
-- `PETTALE_AI_FREE_MONTHLY_REQUEST_LIMIT`: FREE monthly allowance; default `3`.
-- `PETTALE_AI_PREMIUM_MONTHLY_REQUEST_LIMIT`: PREMIUM_TRIAL/PREMIUM allowance; default `100`.
-- `PETTALE_TRIAL_DURATION`: service trial duration; default `P30D`.
-- `PETTALE_EXTRACTION_MODEL`: server-side model selection; default `gpt-5-mini`.
-- `PETTALE_EXTRACTION_REASONING_EFFORT`: Responses API reasoning effort; default `low`.
-- `PETTALE_EXTRACTION_TEXT_VERBOSITY`: Responses API text verbosity; default `low`.
-- `PETTALE_OPENAI_API_KEY`: required at runtime for extraction; secret and server-only.
-- `PETTALE_OPENAI_BASE_URL`: official API base by default; override only for controlled testing.
-- `PETTALE_OPENAI_TIMEOUT`: bounded provider request/connect timeout; default `PT30S`.
-- `PETTALE_AI_RESERVATION_TIMEOUT`: stale reservation threshold; default `PT2M`.
-- `PETTALE_SESSION_LIFETIME`: Pettale JWT duration; V1 default `P30D`.
+- `OREAMY_AI_FREE_MONTHLY_REQUEST_LIMIT`: FREE monthly allowance; default `3`.
+- `OREAMY_AI_PREMIUM_MONTHLY_REQUEST_LIMIT`: PREMIUM_TRIAL/PREMIUM allowance; default `300`.
+- `OREAMY_TRIAL_DURATION`: service trial duration; default `P30D`.
+- `OREAMY_EXTRACTION_MODEL`: server-side model selection; default `gpt-5-mini`.
+- `OREAMY_EXTRACTION_REASONING_EFFORT`: Responses API reasoning effort; default `low`.
+- `OREAMY_EXTRACTION_TEXT_VERBOSITY`: Responses API text verbosity; default `low`.
+- `OREAMY_OPENAI_API_KEY`: required at runtime for extraction; secret and server-only.
+- `OREAMY_OPENAI_BASE_URL`: official API base by default; override only for controlled testing.
+- `OREAMY_OPENAI_TIMEOUT`: bounded provider request/connect timeout; default `PT30S`.
+- `OREAMY_AI_RESERVATION_TIMEOUT`: stale reservation threshold; default `PT2M`.
+- `OREAMY_SESSION_LIFETIME`: Oreamy JWT duration; V1 default `P30D`.
 
 For local physical-device and Simulator QA, the git-ignored `.env` may set both plan limits to `1000` before starting the backend. This raises only that local process's allowance so benchmark usage does not block development. Quota enforcement and authentication remain enabled.
 
-`GET /api/v1/service-access` uses the same service-access resolution and UTC usage count as reservation authorization. It accepts no ownership parameter; the verified Pettale JWT subject is the only identity source. A never-started user is represented as `PREMIUM_TRIAL` with null dates and `trialEligible: true`. No StoreKit entitlement is fabricated in this step, so PREMIUM remains a future verified-entitlement boundary.
+`GET /api/v1/service-access` uses the same service-access resolution and UTC usage count as reservation authorization. It accepts no ownership parameter; the verified Oreamy JWT subject is the only identity source. A never-started user is represented as `PREMIUM_TRIAL` with null dates and `trialEligible: true`. No StoreKit entitlement is fabricated in this step, so PREMIUM remains a future verified-entitlement boundary.
 
-The provider uses the OpenAI Responses API with `store: false` and strict JSON Schema `pettale_event_extraction_v2`. Prompt version `pettale-event-extraction-v2` returns diary text and events together, prohibits translation, diagnosis, invented facts, and material omission, supports multiple events, and uses `recordedAt` as the temporal reference. A successful response requires nonblank `diaryText` with a 4,000 UTF-16-code-unit maximum; backend validation independently enforces this. Only provider/model/token counts/provider request ID are retained. Diary text, raw provider errors, and content are neither persisted nor logged.
+The provider uses the OpenAI Responses API with `store: false` and strict JSON Schema `oreamy_event_extraction_v2`. Prompt version `oreamy-event-extraction-v2` returns diary text and events together, prohibits translation, diagnosis, invented facts, and material omission, supports multiple events, and uses `recordedAt` as the temporal reference. A successful response requires nonblank `diaryText` with a 4,000 UTF-16-code-unit maximum; backend validation independently enforces this. Only provider/model/token counts/provider request ID are retained. Diary text, raw provider errors, and content are neither persisted nor logged.
 
 For the current V1 extraction contract, every `WEIGHT` category draft represents a pet body-weight observation and therefore must use canonical `eventType = BODY_WEIGHT`. The provider instruction and schema description express this semantic rule, and backend validation independently rejects `WEIGHT` drafts with any other event type. No broader event-type taxonomy is defined yet.
 

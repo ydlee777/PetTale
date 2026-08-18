@@ -1,4 +1,4 @@
-# Pettale private persistence
+# Oreamy private persistence
 
 Current schema: `PettaleSchemaV4`, version `4.0.0`.
 
@@ -10,7 +10,7 @@ The authoritative ownership chain is `Pet → PetRecord → PetEvent`; `PetEvent
 
 `PetRecord.originalTranscript` is the user-approved transcript, not the raw SpeechAnalyzer draft. `PetRecord.diaryText` is a separately reviewed natural retelling; new AI-assisted records normally contain both while the optional field preserves historical compatibility. `recordedAt` is the note's recording/context time. `PetEvent.occurredAt` represents the event time and defaults to its record's `recordedAt` when no more precise time is available. Event categories use 11 canonical language-independent codes. Optional `eventType` and `unit` codes are trimmed and uppercased; presentation labels are localized separately.
 
-The application requests the private CloudKit database in `iCloud.com.pettale.app`. Tests explicitly disable CloudKit and use isolated stores. Until an Apple Developer team enables and provisions the iCloud container, application container creation falls back to the same versioned schema in local-only storage.
+The application requests the private CloudKit database in `iCloud.com.oreamy.app`. Tests explicitly disable CloudKit and use isolated stores. Until an Apple Developer team enables and provisions the iCloud container, application container creation falls back to the same versioned schema in local-only storage.
 
 Step 3E keeps AI output in transient `EditableEventDraft` values. An explicit Save validates and normalizes every draft, resolves the Pet by the recording session's fixed ID, then creates one `PetRecord` and zero or more `PetEvent` values in a single `ModelContext` transaction. A deliberately confirmed transcript-only record is supported when the user removes every event. Validation or persistence failure rolls the context back and leaves the review drafts available for retry. Successful Save clears temporary transcript, extraction, and audio session state.
 
